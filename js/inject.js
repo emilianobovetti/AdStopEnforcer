@@ -4,18 +4,18 @@ var bannedWindowProperties = [
 
 function getScriptElement(name) {
   var script = document.createElement('script');
-  script.innerHTML = "Object.defineProperty(window, '"+name+"', {value: null, writable: false, configurable: false});";
+  script.innerHTML = "Object.defineProperty(window, '" + name + "', { value: null, writable: false, configurable: false });";
   return script;
 }
 
-function inject() {
+function injectScript() {
   if (document.head) {
-    for (var i=0; i < bannedWindowProperties.length; i++) {
-      document.head.appendChild(getScriptElement(bannedWindowProperties[i]));
-    }
+    bannedWindowProperties.forEach(function(property) {
+      document.head.appendChild(getScriptElement(property));
+    });
   } else {
-    setTimeout(inject, 1);
+    setTimeout(injectScript, 1);
   }
 }
 
-setTimeout(inject, 1);
+setTimeout(injectScript, 1);
