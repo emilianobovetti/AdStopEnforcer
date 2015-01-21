@@ -3,7 +3,7 @@ var bannedWindowProperties = [
 ];
 
 function getScriptElement(name) {
-  var script = document.createElement('script');
+  var script       = document.createElement('script');
   script.innerHTML = "Object.defineProperty(window, '" + name + "', { value: null, writable: false, configurable: false });";
   return script;
 }
@@ -13,9 +13,8 @@ function injectScript() {
     bannedWindowProperties.forEach(function(property) {
       document.head.appendChild(getScriptElement(property));
     });
-  } else {
-    setTimeout(injectScript, 1);
+    clearInterval(injectCheck);
   }
 }
 
-setTimeout(injectScript, 1);
+var injectCheck = setInterval(injectScript, 1);
