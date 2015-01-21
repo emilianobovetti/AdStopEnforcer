@@ -21,19 +21,18 @@ var bannedWindowProperties = [
 ];
 
 function getScriptElement(name) {
-  var script = document.createElement('script');
-  script.innerHTML = "Object.defineProperty(window, '"+name+"', {value: null, writable: false, configurable: false});";
+  var script       = document.createElement('script');
+  script.innerHTML = "Object.defineProperty(window, '" + name + "', { value: null, writable: false, configurable: false });";
   return script;
 }
 
-function inject() {
+function injectScript() {
   if (document.head) {
-    for (var i=0; i < bannedWindowProperties.length; i++) {
-      document.head.appendChild(getScriptElement(bannedWindowProperties[i]));
-    }
-  } else {
-    setTimeout(inject, 1);
+    bannedWindowProperties.forEach(function(property) {
+      document.head.appendChild(getScriptElement(property));
+    });
+    clearInterval(injectCheck);
   }
 }
 
-setTimeout(inject, 1);
+var injectCheck = setInterval(injectScript, 1);
