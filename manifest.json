@@ -1,14 +1,16 @@
 {
   "name": "FuckFuckAdBlock",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "manifest_version": 2,
+  "short_name": "FFAdBlock",
   "description": "Fucks AdBlock fucker",
+  "default_locale": "en",
+  "author": "Emiliano Bovetti",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  "default_locale": "en",
   "content_scripts": [
     {
       "run_at": "document_start",

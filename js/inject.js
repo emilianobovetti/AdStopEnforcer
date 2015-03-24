@@ -17,7 +17,8 @@
  */
 
 var bannedWindowProperties = [
-  'fuckAdBlock'
+  'fuckAdBlock',
+  'is_adblock_detect'
 ];
 
 function getScriptElement(name) {
