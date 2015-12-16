@@ -16,25 +16,93 @@
  *
  */
 
-var bannedWindowProperties = [
-    'fuckAdBlock',
-    'is_adblock_detect'
-];
+(function (document) {
+    'use strict';
+    var allDomains = '<all>',
 
-function getScriptElement(name) {
-    var script       = document.createElement('script');
-    script.innerHTML = "Object.defineProperty(window, '" + name + "', { value: null, writable: false, configurable: false });";
-    return script;
-}
+        inject = function (name, value, domains) {
+            domains = domains || [allDomains];
 
-function injectScript() {
-    if (document.head) {
-        bannedWindowProperties.forEach(function(property) {
-            document.head.appendChild(getScriptElement(property));
-        });
+            if (typeof domains === 'string') {
+                domains = [domains];
+            }
 
-        clearInterval(injectCheck);
+            return { name: name, value: value, domains: domains };
+        },
+
+        windowProperties = [
+            inject('fuckAdBlock', null),
+            inject('is_adblock_detect', false)
+        ],
+
+        cookies = [
+            inject('xclsvip', 1, 'vipbox.tv')
+        ],
+
+        injectInterval;
+
+    /*
+     * Injectors
+     */
+    function windowPropertyInjector (inject) {
+        var script = document.createElement('script');
+
+        if ( ! document.head) {
+            return false;
+        }
+
+        script.innerHTML = "Object.defineProperty(window, '" + inject.name
+            + "', { value: " + inject.value + ", writable: false, configurable: false });";
+
+        document.head.appendChild(script);
+
+        return true;
     }
-}
 
-var injectCheck = setInterval(injectScript, 1);
+    function cookieInjector (inject) {
+        COOKIES.set(inject.name, inject.value);
+
+        if (COOKIES.get(inject.name) == inject.value) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /*
+     * Run injections
+     */
+    function runInjection(injector, toInject) {
+        // run injection for each element in list
+        toInject.forEach(function(element, index) {
+            var domainCheck = false;
+
+            element.domains.forEach(function (domain) {
+                if (domain === allDomains || document.location.host.indexOf(domain) > -1) {
+                    domainCheck = true;
+                }
+            });
+
+            if ( ! domainCheck || injector(element)) {
+                // if current element doesn't have to be injected
+                // or was successfully injected,
+                // we can remove it from the list
+                toInject.splice(index, 1);
+            }
+        });
+    }
+
+    function mainInjection () {
+        // inject all window properties
+        runInjection(windowPropertyInjector, windowProperties);
+
+        // inject all cookies
+        runInjection(cookieInjector, cookies);
+
+        if (windowProperties.length + cookies.length === 0) {
+            clearInterval(injectInterval);
+        }
+    }
+
+    injectInterval = setInterval(mainInjection, 100);
+})(document);
