@@ -1,30 +1,31 @@
 var COOKIES = (function (document) {
     'use strict';
     var _COOKIES = COOKIES || {},
-        __cache = {};
 
-    document.cookie.split('; ').forEach(function (item) {
-        if ( ! item) return;
+        __read_cookies = function () {
+            var cookies = {};
 
-        item = item.split('=');
-        __cache[item[0]] = item[1];
-    });
+            document.cookie.split('; ').forEach(function (item) {
+                if ( ! item) return;
+
+                item = item.split('=');
+                cookies[item[0]] = item[1];
+            });
+
+            return cookies;
+        };
 
     _COOKIES.get = function (key) {
-        return __cache[key];
+        return __read_cookies()[key];
     };
 
     _COOKIES.set = function (key, value) {
         if ( ! key) return;
 
-        __cache[key] = value;
-
         document.cookie = key + '=' + value + ';';
     };
 
     _COOKIES.remove = function (key) {
-        delete __cache[key];
-
         document.cookie = key + '=; expires=Thu, 01 Jan 1970 00:00:00 UTC';
     };
 
