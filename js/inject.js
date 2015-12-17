@@ -16,6 +16,9 @@
  *
  */
 
+/*global
+    document, setInterval, clearInterval, COOKIES
+ */
 (function (document) {
     'use strict';
     var allDomains = '<all>',
@@ -23,11 +26,15 @@
         inject = function (name, value, domains) {
             domains = domains || [allDomains];
 
-            if (typeof domains === 'string') {
+            if (typeof domains == 'string') {
                 domains = [domains];
             }
 
-            return { name: name, value: value, domains: domains };
+            return {
+                name: name,
+                value: value,
+                domains: domains
+            };
         },
 
         windowProperties = [
@@ -44,22 +51,22 @@
     /*
      * Injectors
      */
-    function windowPropertyInjector (inject) {
+    function windowPropertyInjector(inject) {
         var script = document.createElement('script');
 
         if ( ! document.head) {
             return false;
         }
 
-        script.innerHTML = "Object.defineProperty(window, '" + inject.name
-            + "', { value: " + inject.value + ", writable: false, configurable: false });";
+        script.innerHTML = "Object.defineProperty(window, '" + inject.name +
+                "', { value: " + inject.value + ", writable: false, configurable: false });";
 
         document.head.appendChild(script);
 
         return true;
     }
 
-    function cookieInjector (inject) {
+    function cookieInjector(inject) {
         COOKIES.set(inject.name, inject.value);
 
         if (COOKIES.get(inject.name) == inject.value) {
@@ -74,7 +81,7 @@
      */
     function runInjection(injector, toInject) {
         // run injection for each element in list
-        toInject.forEach(function(element, index) {
+        toInject.forEach(function (element, index) {
             var domainCheck = false;
 
             element.domains.forEach(function (domain) {
@@ -92,7 +99,7 @@
         });
     }
 
-    function mainInjection () {
+    function mainInjection() {
         // inject all window properties
         runInjection(windowPropertyInjector, windowProperties);
 
