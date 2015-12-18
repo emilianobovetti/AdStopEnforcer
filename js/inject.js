@@ -38,13 +38,15 @@
         },
 
         windowProperties = [
-            inject('fuckAdBlock', null),
-            inject('blockAdBlock', null),
-            inject('is_adblock_detect', false)
+            inject('fuckAdBlock', '{}'),
+            inject('FuckAdBlock', 'function () {}'),
+            inject('blockAdBlock', '{}'),
+            inject('BlockAdBlock', 'function () {}'),
+            inject('is_adblock_detect', 'false')
         ],
 
         cookies = [
-            inject('xclsvip', 1, 'vipbox.tv')
+            inject('xclsvip', '1', 'vipbox.tv')
         ],
 
         injectInterval;
