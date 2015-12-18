@@ -39,6 +39,7 @@
 
         windowProperties = [
             inject('fuckAdBlock', null),
+            inject('blockAdBlock', null),
             inject('is_adblock_detect', false)
         ],
 
