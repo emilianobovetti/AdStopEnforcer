@@ -42,7 +42,8 @@
             inject('FuckAdBlock', 'function () {}'),
             inject('blockAdBlock', '{}'),
             inject('BlockAdBlock', 'function () {}'),
-            inject('is_adblock_detect', 'false')
+            inject('is_adblock_detect', 'false'),
+            inject('sniffAdBlock', '{}')
         ],
 
         cookies = [
