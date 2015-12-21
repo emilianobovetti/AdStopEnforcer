@@ -21,23 +21,8 @@
  */
 (function (document) {
     'use strict';
-    var allDomains = '<all>',
 
-        inject = function (name, value, domains) {
-            domains = domains || [allDomains];
-
-            if (typeof domains == 'string') {
-                domains = [domains];
-            }
-
-            return {
-                name: name,
-                value: value,
-                domains: domains
-            };
-        },
-
-        windowProperties = [
+    var windowProperties = [
             inject('fuckAdBlock', '{}'),
             inject('FuckAdBlock', 'function () {}'),
             inject('blockAdBlock', '{}'),
@@ -51,6 +36,29 @@
         ],
 
         injectInterval;
+
+    /*
+     * inject object initializer
+     */
+    function inject(name, value, domains) {
+        // if domains is a falsy value we want to
+        // inject the object (domainCheck = true)
+        var domainCheck = ! domains;
+
+        domains = domainCheck ? [] : (typeof domains == 'string') ? [domains] : domains;
+
+        domains.forEach(function (domain) {
+            if (document.location.host.indexOf(domain) > -1) {
+                domainCheck = true;
+            }
+        });
+
+        return {
+            name: name,
+            value: value,
+            domainCheck: domainCheck
+        };
+    }
 
     /*
      * Injectors
@@ -86,16 +94,8 @@
     function runInjection(injector, toInject) {
         // run injection for each element in list
         toInject.forEach(function (element, index) {
-            var domainCheck = false;
 
-            // TODO domain check in 'inject' function
-            element.domains.forEach(function (domain) {
-                if (domain === allDomains || document.location.host.indexOf(domain) > -1) {
-                    domainCheck = true;
-                }
-            });
-
-            if ( ! domainCheck || injector(element)) {
+            if ( ! element.domainCheck || injector(element)) {
                 // if current element doesn't have to be injected
                 // or was successfully injected,
                 // we can remove it from the list
