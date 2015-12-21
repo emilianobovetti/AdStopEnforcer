@@ -95,6 +95,7 @@
         // run injection for each element in list
         toInject.forEach(function (element, index) {
 
+            // TODO: prevent infinite loop (injector() return always false)
             if ( ! element.domainCheck || injector(element)) {
                 // if current element doesn't have to be injected
                 // or was successfully injected,
