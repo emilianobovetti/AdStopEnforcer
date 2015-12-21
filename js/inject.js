@@ -87,6 +87,7 @@
         toInject.forEach(function (element, index) {
             var domainCheck = false;
 
+            // TODO domain check in 'inject' function
             element.domains.forEach(function (domain) {
                 if (domain === allDomains || document.location.host.indexOf(domain) > -1) {
                     domainCheck = true;
@@ -109,7 +110,7 @@
         // inject all cookies
         runInjection(cookieInjector, cookies);
 
-        if (windowProperties.length + cookies.length === 0) {
+        if (windowProperties.length + cookies.length == 0) {
             clearInterval(injectInterval);
         }
     }

@@ -1,8 +1,8 @@
 {
     "name": "FuckFuckAdBlock",
-    "version": "0.0.4",
-    "manifest_version": 2,
-    "short_name": "FFAdBlock",
+    "version": "0.0.5",
+    "manifest_version": 3,
+    "short_name": "F2AB",
     "description": "Fucks AdBlock fucker",
     "default_locale": "en",
     "author": "Emiliano Bovetti",
