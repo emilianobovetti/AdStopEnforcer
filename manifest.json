@@ -1,7 +1,7 @@
 {
     "name": "FuckFuckAdBlock",
     "version": "0.0.6",
-    "manifest_version": 3,
+    "manifest_version": 2,
     "short_name": "F2AB",
     "description": "Fucks AdBlock fucker",
     "default_locale": "en",
