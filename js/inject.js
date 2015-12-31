@@ -22,13 +22,40 @@
 (function (document) {
     'use strict';
 
-    var windowProperties = [
-            inject('fuckAdBlock', '{}'),
-            inject('FuckAdBlock', 'function () {}'),
-            inject('blockAdBlock', '{}'),
-            inject('BlockAdBlock', 'function () {}'),
+    var faker = '(' + (function () {
+            var self = {
+                on: function(detected, fn) {
+                    if (detected) {
+                        return self;
+                    } else {
+                        fn();
+                        return self;
+                    }
+                },
+
+                onDetected: function (fn) {
+                    return self.on(true, fn);
+                },
+
+                onNotDetected: function (fn) {
+                    return self.on(false, fn);
+                }
+            };
+
+            return self;
+        }).toString() + ')()',
+
+        fakerConstructor = 'function () { return ' + faker + '; }',
+
+        windowProperties = [
+            inject('fuckAdBlock', faker),
+            inject('blockAdBlock', faker),
+            inject('sniffAdBlock', faker),
+            inject('cadetect', faker),
+            inject('FuckAdBlock', fakerConstructor),
+            inject('BlockAdBlock', fakerConstructor),
             inject('is_adblock_detect', 'false'),
-            inject('sniffAdBlock', '{}')
+            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com')
         ],
 
         cookies = [
@@ -56,7 +83,8 @@
         return {
             name: name,
             value: value,
-            domainCheck: domainCheck
+            domainCheck: domainCheck,
+            attempts: 10
         };
     }
 
@@ -70,8 +98,8 @@
             return false;
         }
 
-        script.innerHTML = "Object.defineProperty(window, '" + inject.name +
-                "', { value: " + inject.value + ", writable: false, configurable: false });";
+        script.innerHTML = 'Object.defineProperty(window, "' + inject.name + '"'
+            + ', { value: ' + inject.value + ', writable: false, configurable: false });';
 
         document.head.appendChild(script);
 
@@ -95,13 +123,15 @@
         // run injection for each element in list
         toInject.forEach(function (element, index) {
 
-            // TODO: prevent infinite loop (injector() return always false)
-            if ( ! element.domainCheck || injector(element)) {
-                // if current element doesn't have to be injected
-                // or was successfully injected,
+            if ( element.attempts == 0 || ! element.domainCheck || injector(element)) {
+                // if current element doesn't have to be injected,
+                // was successfully injected,
+                // or attemps number is 0
                 // we can remove it from the list
                 toInject.splice(index, 1);
             }
+
+            element.attempts -= 1;
         });
     }
 
