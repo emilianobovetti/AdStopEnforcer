@@ -55,7 +55,7 @@
             inject('FuckAdBlock', fakerConstructor),
             inject('BlockAdBlock', fakerConstructor),
             inject('is_adblock_detect', 'false'),
-            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com') // danger: untested
+            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com') // TODO danger: untested
         ],
 
         cookies = [
