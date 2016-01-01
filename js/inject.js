@@ -24,13 +24,11 @@
 
     var faker = '(' + (function () {
             var self = {
-                on: function(detected, fn) {
-                    if (detected) {
-                        return self;
-                    } else {
+                on: function (detected, fn) {
+                    if ( ! detected) {
                         fn();
-                        return self;
                     }
+                    return self;
                 },
 
                 onDetected: function (fn) {
@@ -59,7 +57,8 @@
         ],
 
         cookies = [
-            inject('xclsvip', '1', 'vipbox.tv')
+            inject('xclsvip', '1', 'vipbox.tv'),
+            inject('CBS_ADV_VAL', ';bc=false', 'cbs.com')
         ],
 
         injectInterval;
@@ -123,7 +122,7 @@
         // run injection for each element in list
         toInject.forEach(function (element, index) {
 
-            if ( element.attempts == 0 || ! element.domainCheck || injector(element)) {
+            if (element.attempts == 0 || ! element.domainCheck || injector(element)) {
                 // if current element doesn't have to be injected,
                 // was successfully injected,
                 // or attemps number is 0
