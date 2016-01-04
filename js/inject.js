@@ -28,6 +28,7 @@
                     if ( ! detected) {
                         fn();
                     }
+
                     return self;
                 },
 
@@ -53,12 +54,13 @@
             inject('FuckAdBlock', fakerConstructor),
             inject('BlockAdBlock', fakerConstructor),
             inject('is_adblock_detect', 'false'),
-            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com') // TODO danger: untested
+            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com'), // TODO danger: untested
         ],
 
         cookies = [
             inject('xclsvip', '1', 'vipbox.tv'),
-            inject('CBS_ADV_VAL', ';bc=false', 'cbs.com')
+            //inject('CBS_ADV_SUBSES_VAL', '0', 'cbs.com'),
+            //inject('CBS_ADV_VAL', '%25%3Bbc%3Dfalse', 'cbs.com'),
         ],
 
         injectInterval;
@@ -122,7 +124,7 @@
         // run injection for each element in list
         toInject.forEach(function (element, index) {
 
-            if (element.attempts == 0 || ! element.domainCheck || injector(element)) {
+            if ( ! element || ! element.attempts || ! element.domainCheck || injector(element)) {
                 // if current element doesn't have to be injected,
                 // was successfully injected,
                 // or attemps number is 0
@@ -134,7 +136,7 @@
         });
     }
 
-    function mainInjection() {
+    injectInterval = setInterval(function () {
         // inject all window properties
         runInjection(windowPropertyInjector, windowProperties);
 
@@ -144,7 +146,5 @@
         if (windowProperties.length + cookies.length == 0) {
             clearInterval(injectInterval);
         }
-    }
-
-    injectInterval = setInterval(mainInjection, 100);
+    }, 10);
 })(document);
