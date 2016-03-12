@@ -46,6 +46,8 @@
 
         fakerConstructor = 'function () { return ' + faker + '; }',
 
+        emptyFunction = 'function () {}',
+
         windowProperties = [
             inject('fuckAdBlock', faker),
             inject('blockAdBlock', faker),
@@ -54,7 +56,9 @@
             inject('FuckAdBlock', fakerConstructor),
             inject('BlockAdBlock', fakerConstructor),
             inject('is_adblock_detect', 'false'),
-            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com'), // TODO danger: untested
+
+            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com'),
+            inject('xaZlE', emptyFunction, 'kisscartoon.me')
         ],
 
         cookies = [
@@ -108,9 +112,9 @@
     }
 
     function cookieInjector(inject) {
-        COOKIES.set(inject.name, inject.value);
+        COOKIES.set(inject.name, String(inject.value));
 
-        if (COOKIES.get(inject.name) == inject.value) {
+        if (COOKIES.get(inject.name) === String(inject.value)) {
             return true;
         } else {
             return false;
