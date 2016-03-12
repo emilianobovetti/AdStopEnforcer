@@ -20,7 +20,7 @@ var INJECT = (function () {
     'use strict';
     var _INJECT = INJECT || {},
 
-        domainCheck = function (domains) {
+        __domainCheck = function (domains) {
             // if domains is a falsy value we want to
             // inject the object (check = true)
             var check = ! domains;
@@ -91,7 +91,7 @@ var INJECT = (function () {
     _INJECT.value = function (value, domains) {
         return {
             value: value,
-            domainCheck: domainCheck(domains),
+            domainCheck: __domainCheck(domains),
             attempts: 10
         };
     };
@@ -100,7 +100,7 @@ var INJECT = (function () {
         return {
             key: key,
             value: value,
-            domainCheck: domainCheck(domains),
+            domainCheck: __domainCheck(domains),
             attempts: 10
         };
     };
