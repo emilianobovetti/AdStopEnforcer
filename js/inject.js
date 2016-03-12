@@ -16,139 +16,94 @@
  *
  */
 
-/*global
-    document, setInterval, clearInterval, COOKIES
- */
-(function (document) {
+var INJECT = (function () {
     'use strict';
+    var _INJECT = INJECT || {},
 
-    var faker = '(' + (function () {
-            var self = {
-                on: function (detected, fn) {
-                    if ( ! detected) {
-                        fn();
-                    }
+        domainCheck = function (domains) {
+            // if domains is a falsy value we want to
+            // inject the object (check = true)
+            var check = ! domains;
 
-                    return self;
-                },
+            domains = check ? [] : (typeof domains == 'string') ? [domains] : domains;
 
-                onDetected: function (fn) {
-                    return self.on(true, fn);
-                },
-
-                onNotDetected: function (fn) {
-                    return self.on(false, fn);
+            domains.forEach(function (domain) {
+                if (document.location.host.indexOf(domain) > -1) {
+                    check = true;
                 }
-            };
+            });
 
-            return self;
-        }).toString() + ')()',
+            return check;
+        };
 
-        fakerConstructor = 'function () { return ' + faker + '; }',
+    _INJECT.emptyFunction = 'function () {}';
 
-        emptyFunction = 'function () {}',
+    _INJECT.fakeFab = '(' + (function () {
+        var self = {
+            on: function (detected, fn) {
+                if ( ! detected) {
+                   fn();
+                }
 
-        windowProperties = [
-            inject('fuckAdBlock', faker),
-            inject('blockAdBlock', faker),
-            inject('sniffAdBlock', faker),
-            inject('cadetect', faker),
-            inject('FuckAdBlock', fakerConstructor),
-            inject('BlockAdBlock', fakerConstructor),
-            inject('is_adblock_detect', 'false'),
+                return self;
+            },
 
-            inject('fbs_settings', '{ classes: "e30=" }', 'forbes.com'),
-            inject('xaZlE', emptyFunction, 'kisscartoon.me')
-        ],
+            onDetected: function (fn) {
+                return self.on(true, fn);
+            },
 
-        cookies = [
-            inject('xclsvip', '1', 'vipbox.tv'),
-            //inject('CBS_ADV_SUBSES_VAL', '0', 'cbs.com'),
-            //inject('CBS_ADV_VAL', '%25%3Bbc%3Dfalse', 'cbs.com'),
-        ],
+            onNotDetected: function (fn) {
+                return self.on(false, fn);
+            }
+        };
 
-        injectInterval;
+        return self;
+    }).toString() + ')()';
+
+    _INJECT.fakeFabConstructor = 'function () { return ' + _INJECT.fakeFab + '; }';
+
+    _INJECT.fakeSetTimeout = function (bannedTimeoutFunctions) {
+        bannedTimeoutFunctions = bannedTimeoutFunctions
+            .filter(function (x) { return x.domainCheck; })
+            .map(function (x) { return x.value; });
+
+        if (bannedTimeoutFunctions.length > 0) {
+            return "var bannedTimeoutFunctions = ['"
+                +       bannedTimeoutFunctions.join("','") + "'];"
+                + "var realSetTimeout = (function () { return setTimeout; })();"
+                + "setTimeout = function (fn, timeout) {"
+                + "     var banned = false;"
+                + "     if (fn.name && bannedTimeoutFunctions.length > 0) {"
+                + "         bannedTimeoutFunctions.forEach(function (item) {"
+                + "             if (fn.name === item) banned = true;"
+                + "         });"
+                + "     }"
+                + "     if ( ! banned) realSetTimeout(fn, timeout);"
+                + "};";
+        } else {
+            return "";
+        }
+    };
 
     /*
      * inject object initializer
      */
-    function inject(name, value, domains) {
-        // if domains is a falsy value we want to
-        // inject the object (domainCheck = true)
-        var domainCheck = ! domains;
-
-        domains = domainCheck ? [] : (typeof domains == 'string') ? [domains] : domains;
-
-        domains.forEach(function (domain) {
-            if (document.location.host.indexOf(domain) > -1) {
-                domainCheck = true;
-            }
-        });
-
+    _INJECT.value = function (value, domains) {
         return {
-            name: name,
             value: value,
-            domainCheck: domainCheck,
+            domainCheck: domainCheck(domains),
             attempts: 10
         };
-    }
+    };
 
-    /*
-     * Injectors
-     */
-    function windowPropertyInjector(inject) {
-        var script = document.createElement('script');
+    _INJECT.pair = function (key, value, domains) {
+        return {
+            key: key,
+            value: value,
+            domainCheck: domainCheck(domains),
+            attempts: 10
+        };
+    };
 
-        if ( ! document.head) {
-            return false;
-        }
-
-        script.innerHTML = 'Object.defineProperty(window, "' + inject.name + '"'
-            + ', { value: ' + inject.value + ', writable: false, configurable: false });';
-
-        document.head.appendChild(script);
-
-        return true;
-    }
-
-    function cookieInjector(inject) {
-        COOKIES.set(inject.name, String(inject.value));
-
-        if (COOKIES.get(inject.name) === String(inject.value)) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /*
-     * Run injections
-     */
-    function runInjection(injector, toInject) {
-        // run injection for each element in list
-        toInject.forEach(function (element, index) {
-
-            if ( ! element || ! element.attempts || ! element.domainCheck || injector(element)) {
-                // if current element doesn't have to be injected,
-                // was successfully injected,
-                // or attemps number is 0
-                // we can remove it from the list
-                toInject.splice(index, 1);
-            }
-
-            element.attempts -= 1;
-        });
-    }
-
-    injectInterval = setInterval(function () {
-        // inject all window properties
-        runInjection(windowPropertyInjector, windowProperties);
-
-        // inject all cookies
-        runInjection(cookieInjector, cookies);
-
-        if (windowProperties.length + cookies.length == 0) {
-            clearInterval(injectInterval);
-        }
-    }, 10);
-})(document);
+    return _INJECT;
+})();

@@ -1,6 +1,6 @@
 {
     "name": "FuckFuckAdBlock",
-    "version": "0.0.8",
+    "version": "0.1.0",
     "manifest_version": 2,
     "short_name": "F2AB",
     "description": "Fucks AdBlock fucker",
@@ -19,7 +19,8 @@
             ],
             "js": [
                 "js/cookies.js",
-                "js/inject.js"
+                "js/inject.js",
+                "js/main.js"
             ]
         }
     ]
