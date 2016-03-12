@@ -43,6 +43,9 @@
         /*
          * Array of INJECT.value() objects which contain function names
          * that can't be called through setTimeout().
+         *
+         * Note that fakeSetTimeout function won't be injected if nothing
+         * have to be injected, so use domain specific values.
          */
         bannedTimeoutFunctions = [
             INJECT.value('adsBlock', 'el-nation.com')
