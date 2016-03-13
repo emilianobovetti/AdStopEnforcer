@@ -34,7 +34,40 @@ var INJECT = (function () {
             });
 
             return check;
+        },
+
+        __setTimeoutInhibitor = function (bannedArray, bannedCondition) {
+            var script = null;
+
+            bannedArray = bannedArray
+                .filter(function (x) { return x.domainCheck; })
+                .map(function (x) { return x.value; });
+
+            if (bannedArray.length > 0) {
+                script = '(function (window) {'
+                    + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
+                    + '     realSetTimeout = (function () { return window.setTimeout; })();'
+
+                    + ' window.setTimeout = function (fn, timeout) {'
+                    + '     var isBanned = false;'
+                    + '     bannedArray.forEach(function (bannedItem) {'
+                    + '         if (' + bannedCondition + ') isBanned = true;'
+                    + '     });'
+                    + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
+                    + ' };'
+                    + '})(window);';
+            }
+
+            return INJECT.value(script);
         };
+
+    _INJECT.setTimeoutNameInhibitor = function (bannedTimeoutNames) {
+        return __setTimeoutInhibitor(bannedTimeoutNames, 'fn.name === bannedItem');
+    };
+
+    _INJECT.setTimeoutContentInhibitor = function (bannedTimeoutContents) {
+        return __setTimeoutInhibitor(bannedTimeoutContents, 'fn.toString().indexOf(bannedItem) > -1');
+    };
 
     _INJECT.emptyFunction = 'function () {}';
 
@@ -62,29 +95,6 @@ var INJECT = (function () {
 
     _INJECT.fakeFabConstructor = 'function () { return ' + _INJECT.fakeFab + '; }';
 
-    _INJECT.fakeSetTimeout = function (bannedTimeoutFunctions) {
-        bannedTimeoutFunctions = bannedTimeoutFunctions
-            .filter(function (x) { return x.domainCheck; })
-            .map(function (x) { return x.value; });
-
-        if (bannedTimeoutFunctions.length > 0) {
-            return "var bannedTimeoutFunctions = ['"
-                +       bannedTimeoutFunctions.join("','") + "'];"
-                + "var realSetTimeout = (function () { return setTimeout; })();"
-                + "setTimeout = function (fn, timeout) {"
-                + "     var banned = false;"
-                + "     if (fn.name && bannedTimeoutFunctions.length > 0) {"
-                + "         bannedTimeoutFunctions.forEach(function (item) {"
-                + "             if (fn.name === item) banned = true;"
-                + "         });"
-                + "     }"
-                + "     if ( ! banned) realSetTimeout(fn, timeout);"
-                + "};";
-        } else {
-            return "";
-        }
-    };
-
     /*
      * inject object initializer
      */
@@ -93,7 +103,7 @@ var INJECT = (function () {
             value: value,
             domainCheck: __domainCheck(domains),
             attempts: 10,
-            toString: function () { return value }
+            toString: function () { return value; }
         };
     };
 

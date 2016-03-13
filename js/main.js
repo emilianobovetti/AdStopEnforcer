@@ -46,11 +46,21 @@
          * Array of INJECT.value() objects which contain function names
          * that can't be called through setTimeout().
          *
-         * Note that fakeSetTimeout function won't be injected if nothing
+         * Note that setTimeoutNameInhibitor function won't be injected if nothing
          * have to be injected, so use domain specific values.
          */
-        bannedTimeoutFunctions = [
+        bannedTimeoutNames = [
             INJECT.value('adsBlock', 'el-nation.com')
+        ],
+
+        /*
+         * Values in this array cannot appear in code of functions that
+         * are passed to setTimeout().
+         *
+         * This can be CPU intensive.
+         */
+        bannedTimeoutContents = [
+            // TODO
         ],
 
         /*
@@ -64,11 +74,12 @@
         ],
 
         /*
-         * Array of INJECT.value() objects which contains javascript
+         * Array of INJECT.value() objects which contain javascript
          * to be injected.
          */
         scripts = [
-            INJECT.value(INJECT.fakeSetTimeout(bannedTimeoutFunctions))
+            INJECT.setTimeoutNameInhibitor(bannedTimeoutNames),
+            INJECT.setTimeoutContentInhibitor(bannedTimeoutContents)
         ],
 
         injectInterval;
