@@ -52,6 +52,7 @@ var INJECT = (function () {
                     + '     var isBanned = false;'
                     + '     bannedArray.forEach(function (bannedItem) {'
                     + '         if (' + bannedCondition + ') isBanned = true;'
+                    //DEBUG! + '         console.log(fn.toString()); if (' + bannedCondition + ') { isBanned = true; console.log(">>banned<<"); } console.log("----------------");'
                     + '     });'
                     + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
                     + ' };'

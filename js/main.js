@@ -60,7 +60,7 @@
          * This can be CPU intensive.
          */
         bannedTimeoutContents = [
-            // TODO
+            INJECT.value('displayAdBlockMessage', 'forbes.com')
         ],
 
         /*
