@@ -92,7 +92,8 @@ var INJECT = (function () {
         return {
             value: value,
             domainCheck: __domainCheck(domains),
-            attempts: 10
+            attempts: 10,
+            toString: function () { return value }
         };
     };
 

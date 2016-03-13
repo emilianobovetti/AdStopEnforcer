@@ -35,8 +35,10 @@
             INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
             INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
             INJECT.pair('is_adblock_detect', 'false'),
+            INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
 
-            INJECT.pair('fbs_settings', '{ classes: "e30=" }', 'forbes.com'),
+            INJECT.pair('fbs_settings', '{ classes: "WyJhIiwiYiJd" }', 'forbes.com'),
+            INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
             INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
         ],
 
@@ -80,11 +82,8 @@
         if ( ! document.head) {
             return false;
         } else {
-            if (inject.value) {
-                script.innerHTML = inject.value;
-            } else {
-                script.innerHTML = inject;
-            }
+            script.innerHTML = inject.toString();
+
             document.head.appendChild(script);
             return true;
         }
