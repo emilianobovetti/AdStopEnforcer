@@ -61,12 +61,12 @@ var INJECT = (function () {
             return INJECT.value(script);
         };
 
-    _INJECT.setTimeoutNameInhibitor = function (bannedTimeoutNames) {
-        return __setTimeoutInhibitor(bannedTimeoutNames, 'fn.name === bannedItem');
+    _INJECT.setTimeoutNameInhibitor = function (bannedSetTimeoutNames) {
+        return __setTimeoutInhibitor(bannedSetTimeoutNames, 'fn.name === bannedItem');
     };
 
-    _INJECT.setTimeoutContentInhibitor = function (bannedTimeoutContents) {
-        return __setTimeoutInhibitor(bannedTimeoutContents, 'fn.toString().indexOf(bannedItem) > -1');
+    _INJECT.setTimeoutContentInhibitor = function (bannedSetTimeoutContents) {
+        return __setTimeoutInhibitor(bannedSetTimeoutContents, 'fn.toString().indexOf(bannedItem) > -1');
     };
 
     _INJECT.emptyFunction = 'function () {}';

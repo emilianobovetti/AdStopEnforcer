@@ -49,7 +49,7 @@
          * Note that setTimeoutNameInhibitor function won't be injected if nothing
          * have to be injected, so use domain specific values.
          */
-        bannedTimeoutNames = [
+        bannedSetTimeoutNames = [
             INJECT.value('adsBlock', 'el-nation.com')
         ],
 
@@ -59,7 +59,7 @@
          *
          * This can be CPU intensive.
          */
-        bannedTimeoutContents = [
+        bannedSetTimeoutContents = [
             INJECT.value('displayAdBlockMessage', 'forbes.com')
         ],
 
@@ -78,8 +78,8 @@
          * to be injected.
          */
         scripts = [
-            INJECT.setTimeoutNameInhibitor(bannedTimeoutNames),
-            INJECT.setTimeoutContentInhibitor(bannedTimeoutContents)
+            INJECT.setTimeoutNameInhibitor(bannedSetTimeoutNames),
+            INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents)
         ],
 
         injectInterval;
