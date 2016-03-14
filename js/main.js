@@ -90,11 +90,11 @@
     function scriptInjector(inject) {
         var script = document.createElement('script');
 
+        script.innerHTML = inject.toString();
+
         if ( ! document.head) {
             return false;
         } else {
-            script.innerHTML = inject.toString();
-
             document.head.appendChild(script);
             return true;
         }
@@ -108,11 +108,7 @@
     function cookieInjector(inject) {
         COOKIES.set(inject.key, String(inject.value));
 
-        if (COOKIES.get(inject.key) === String(inject.value)) {
-            return true;
-        } else {
-            return false;
-        }
+        return COOKIES.get(inject.key) === String(inject.value);
     }
 
     /*
