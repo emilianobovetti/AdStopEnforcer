@@ -87,6 +87,10 @@ var INJECT = (function () {
 
             onNotDetected: function (fn) {
                 return self.on(false, fn);
+            },
+
+            check: function (loop) {
+                return true;
             }
         };
 
