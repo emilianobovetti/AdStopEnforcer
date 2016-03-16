@@ -37,7 +37,8 @@
             INJECT.pair('is_adblock_detect', 'false'),
             INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
 
-            INJECT.pair('fbs_settings', '{ classes: "WyJhIiwiYiJd" }', 'forbes.com'),
+            INJECT.pair('tmgAds.adblock.status', '1', 'telegraph.co.uk'),
+            INJECT.pair('fbs_settings.classes', '"WyJhIiwiYiJd"', 'forbes.com'),
             INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
             INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
         ],
@@ -69,8 +70,6 @@
          */
         cookies = [
             INJECT.pair('xclsvip', '1', 'vipbox.tv')
-            //INJECT.pair('CBS_ADV_SUBSES_VAL', '0', 'cbs.com'),
-            //INJECT.pair('CBS_ADV_VAL', '%25%3Bbc%3Dfalse', 'cbs.com'),
         ],
 
         /*
@@ -79,7 +78,7 @@
          */
         scripts = [
             INJECT.setTimeoutNameInhibitor(bannedSetTimeoutNames),
-            INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents)
+            INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents),
         ],
 
         injectInterval;
@@ -101,8 +100,40 @@
     }
 
     function windowPropertyInjector(inject) {
-        return scriptInjector('Object.defineProperty(window, "' + inject.key + '", { value: '
-            + inject.value + ', writable: false, configurable: false });');
+        var propertyList = inject.key.split('.'),
+            property = propertyList.shift();
+
+        function __defineProperty (object, property, propertyList) {
+            var propertyListCopy = propertyList.slice();
+
+            return propertyList.length == 0
+                ? 'Object.defineProperty(' + object + ', "' + property + '", {'
+                + ' value: ' + inject.value + ','
+                + ' writable: false,'
+                + ' configurable: false'
+                + '});'
+
+                : 'Object.defineProperty(' + object + ', "' + property + '", {'
+                + ' get: function () {'
+                + '     return this.__' + property + ';'
+                + ' },'
+                + ' set: function (value) {'
+                + '     var property = value.' + propertyList[0] + ';'
+                + '     delete value.' + propertyList[0] + ';'
+                +       __defineProperty('value', propertyListCopy.shift(), propertyListCopy)
+
+                + (propertyList.length > 1
+                ? '     if (property !== undefined) {'
+                + '         value.' + propertyList[0] + ' = property;'
+                + '     }'
+                : '')
+
+                + '     this.__' + property + ' = value;'
+                + ' }'
+                + '});';
+        }
+
+        return scriptInjector(__defineProperty('window', property, propertyList));
     }
 
     function cookieInjector(inject) {

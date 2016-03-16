@@ -46,7 +46,7 @@ var INJECT = (function () {
             if (bannedArray.length > 0) {
                 script = '(function (window) {'
                     + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
-                    + '     realSetTimeout = (function () { return window.setTimeout; })();'
+                    + '     realSetTimeout = window.setTimeout;'
 
                     + ' window.setTimeout = function (fn, timeout) {'
                     + '     var isBanned = false;'
