@@ -107,7 +107,7 @@
         function __defineProperty (object, property, propertyList) {
             var propertyListCopy = propertyList.slice();
 
-            // TODO (value || {}).
+            // TODO check if 'value' is object
             return propertyList.length == 0
                 ? 'Object.defineProperty(' + object + ', "' + property + '", {'
                 + ' value: ' + inject.value + ','
