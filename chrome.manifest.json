@@ -2,9 +2,8 @@
     "name": "FuckFuckAdBlock",
     "version": "0.2.0",
     "manifest_version": 2,
-    "short_name": "F2AB",
-    "description": "Fucks AdBlock fucker",
-    "default_locale": "en",
+    "short_name": "FFAB",
+    "description": "Prevent boring messages like \"disable AdBlock and refresh page to continue\"",
     "author": "Emiliano Bovetti",
     "icons": {
         "16": "icons/icon16.png",
