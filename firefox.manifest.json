@@ -1,6 +1,6 @@
 {
     "name": "FuckFuckAdBlock",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "manifest_version": 2,
     "short_name": "FFAB",
     "description": "Prevent boring messages like \"disable AdBlock and refresh page to continue\"",

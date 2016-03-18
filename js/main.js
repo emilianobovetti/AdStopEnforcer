@@ -17,7 +17,7 @@
  */
 
 /*global
-    document, setInterval, clearInterval, INJECT, COOKIES
+    document, setInterval, clearInterval, INJECT
  */
 (function (document) {
     'use strict';
@@ -63,14 +63,6 @@
          */
         bannedSetTimeoutContents = [
             INJECT.value('displayAdBlockMessage', 'forbes.com')
-        ],
-
-        /*
-         * Array of INJECT.pair() objects which contain cookie names
-         * and values to be injected.
-         */
-        cookies = [
-            INJECT.pair('xclsvip', '1', 'vipbox.tv')
         ],
 
         /*
@@ -138,12 +130,6 @@
         return scriptInjector(__defineProperty('window', property, propertyList));
     }
 
-    function cookieInjector(inject) {
-        COOKIES.set(inject.key, String(inject.value));
-
-        return COOKIES.get(inject.key) === String(inject.value);
-    }
-
     /*
      * Run injections
      */
@@ -170,10 +156,7 @@
         // inject all window properties
         runInjection(windowPropertyInjector, windowProperties);
 
-        // inject all cookies
-        runInjection(cookieInjector, cookies);
-
-        if (scripts.length + windowProperties.length + cookies.length == 0) {
+        if (scripts.length + windowProperties.length == 0) {
             clearInterval(injectInterval);
         }
     }, 10);

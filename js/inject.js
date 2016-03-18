@@ -18,6 +18,7 @@
 
 var INJECT = (function () {
     'use strict';
+
     var _INJECT = INJECT || {},
 
         __domainCheck = function (domains) {
