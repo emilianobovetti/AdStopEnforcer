@@ -29,7 +29,7 @@ var INJECT = (function () {
             domains = check ? [] : (typeof domains == 'string') ? [domains] : domains;
 
             domains.forEach(function (domain) {
-                if (document.location.host.indexOf(domain) > -1) {
+                if (document.location.hostname.endsWith(domain) > -1) {
                     check = true;
                 }
             });
