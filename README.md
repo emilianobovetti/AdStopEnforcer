@@ -9,4 +9,4 @@ Currently the script was tested only on few sites, please contact me if you enco
 
 Download chrome version from [chrome.google.com](https://chrome.google.com/webstore/detail/fuckfuckadblock/hbpkckdpldklpnkfacfjpjhajmenaejo).
 
-Download firefox version from [addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/fuckfuckadblock/)
+Download firefox version from [addons.mozilla.org](https://addons.mozilla.org/addon/fuckfuckadblock/)

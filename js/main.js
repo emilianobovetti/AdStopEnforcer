@@ -107,24 +107,27 @@
                 + ' configurable: false'
                 + '});'
 
-                : 'Object.defineProperty(' + object + ', "' + property + '", {'
-                + ' get: function () {'
-                + '     return this.__' + property + ';'
-                + ' },'
-                + ' set: function (value) {'
-                + '     var property = value.' + propertyList[0] + ';'
-                + '     delete value.' + propertyList[0] + ';'
-                +       __defineProperty('value', propertyListCopy.shift(), propertyListCopy)
+                : '(function () {'
+                + ' var __property;'
+                + ' Object.defineProperty(' + object + ', "' + property + '", {'
+                + '     get: function () {'
+                + '         return __property;'
+                + '     },'
+                + '     set: function (value) {'
+                + '         var property = value.' + propertyList[0] + ';'
+                + '         delete value.' + propertyList[0] + ';'
+                +           __defineProperty('value', propertyListCopy.shift(), propertyListCopy)
 
                 + (propertyList.length > 1
-                ? '     if (property !== undefined) {'
-                + '         value.' + propertyList[0] + ' = property;'
-                + '     }'
+                ? '         if (property !== undefined) {'
+                + '             value.' + propertyList[0] + ' = property;'
+                + '         }'
                 : '')
 
-                + '     this.__' + property + ' = value;'
-                + ' }'
-                + '});';
+                + '         __property = value;'
+                + '     }'
+                + ' });'
+                + '})();'
         }
 
         return scriptInjector(__defineProperty('window', property, propertyList));
