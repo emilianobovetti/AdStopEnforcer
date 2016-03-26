@@ -80,16 +80,13 @@
      * Injectors
      */
     function scriptInjector(inject) {
-        var script = document.createElement('script');
+        var s = document.createElement('script');
 
-        script.innerHTML = inject.toString();
+        s.textContent = inject.toString();
 
-        if ( ! document.head) {
-            return false;
-        } else {
-            document.head.appendChild(script);
-            return true;
-        }
+        (document.head || document.documentElement).appendChild(s);
+        s.remove();
+        return true;
     }
 
     function windowPropertyInjector(inject) {
