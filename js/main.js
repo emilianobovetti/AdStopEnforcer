@@ -138,7 +138,7 @@
                 + '})();'
         }
 
-        return scriptInjector(__defineProperty('window', property, propertyList));
+        return scriptInjector(INJECT.value(__defineProperty('window', property, propertyList)));
     }
 
     /*
