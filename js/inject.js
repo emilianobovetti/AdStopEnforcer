@@ -29,23 +29,21 @@ var INJECT = (function () {
             domains = check ? [] : (typeof domains == 'string') ? [domains] : domains;
 
             domains.forEach(function (domain) {
-                if (document.location.hostname.endsWith(domain) > -1) {
-                    check = true;
-                }
+                check = check || document.location.hostname.endsWith(domain);
             });
 
             return check;
         },
 
         __setTimeoutInhibitor = function (bannedArray, bannedCondition) {
-            var script = null;
+            var script;
 
             bannedArray = bannedArray
                 .filter(function (x) { return x.domainCheck; })
                 .map(function (x) { return x.value; });
 
             if (bannedArray.length > 0) {
-                script = '(function (window) {'
+                script = '(function () {'
                     + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
                     + '     realSetTimeout = window.setTimeout;'
 
@@ -56,7 +54,7 @@ var INJECT = (function () {
                     + '     });'
                     + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
                     + ' };'
-                    + '})(window);';
+                    + '})();';
             }
 
             return INJECT.value(script);
@@ -68,6 +66,56 @@ var INJECT = (function () {
 
     _INJECT.setTimeoutContentInhibitor = function (bannedSetTimeoutContents) {
         return __setTimeoutInhibitor(bannedSetTimeoutContents, 'fn.toString().indexOf(bannedItem) > -1');
+    };
+
+    _INJECT.jQuerySelectorFilter = function (filteredSelectors) {
+        var script;
+
+        filteredSelectors = filteredSelectors.filter(function (x) { return x.domainCheck; });
+
+        if (filteredSelectors.length > 0) {
+            script = '(function () {'
+                + ' var jQuery,'
+                + '     filteredSelectors = [' + filteredSelectors
+                    .reduce(function (acc, x, idx) { return acc + (idx ? ', ' : '') + '{ key: "' + x.key + '", value: ' + x.value + ' }'; }, '') + '];'
+
+                + ' function deepMerge (target, source) {'
+                + '     Object.keys(source).forEach(function (key) {'
+                + '         if (target[key] && typeof target[key] == "object" && source[key] && typeof source[key] == "object") {'
+                + '             target[key] = deepMerge(target[key], source[key]);'
+                + '         } else {'
+                + '             target[key] = source[key];'
+                + '         }'
+                + '     });'
+                + '     return target;'
+                + ' }'
+
+                + ' function jQueryGetter() {'
+                + '     return jQuery;'
+                + ' }'
+
+                + ' function jQuerySetter(realJQuery) {'
+                + '     jQuery = function (selector, context) {'
+                + '         var obj = realJQuery(selector, context);'
+
+                + '         filteredSelectors.forEach(function (item) {'
+                + '             if (selector === item.key) {'
+                + '                 obj = deepMerge(obj, item.value);'
+                + '             }'
+                + '         });'
+                + '         return obj;'
+                + '     };'
+                + '     Object.keys(realJQuery).forEach(function (key) {'
+                + '         jQuery[key] = realJQuery[key];'
+                + '     });'
+                + ' }'
+
+                + ' Object.defineProperty(window, "jQuery", { get: jQueryGetter, set: jQuerySetter });'
+                + ' Object.defineProperty(window, "$", { get: jQueryGetter, set: jQuerySetter });'
+                + '})();'
+        }
+
+        return INJECT.value(script);
     };
 
     _INJECT.emptyFunction = 'function () {}';
@@ -107,8 +155,7 @@ var INJECT = (function () {
         return {
             value: value,
             domainCheck: __domainCheck(domains),
-            attempts: 10,
-            toString: function () { return value; }
+            attempts: 10
         };
     };
 

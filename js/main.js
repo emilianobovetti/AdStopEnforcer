@@ -39,7 +39,6 @@
 
             INJECT.pair('tmgAds.adblock.status', '1', 'telegraph.co.uk'),
             INJECT.pair('fbs_settings.classes', '"WyJhIiwiYiJd"', 'forbes.com'),
-            //INJECT.pair('fbs_settings', '{ classes: "WyJhIiwiYiJd" }', 'forbes.com'),
             INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
             INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
         ],
@@ -66,12 +65,21 @@
         ],
 
         /*
+         * Array of INJECT.pair() objects with filtered jQuery selector
+         * and an object of injected properties.
+         */
+        filteredJQuerySelectors = [
+            INJECT.pair('#vipchat', '{ length: 1 }', ['vipbox.tv', 'vipbox.sx'])
+        ],
+
+        /*
          * Array of INJECT.value() objects which contain javascript
          * to be injected.
          */
         scripts = [
             INJECT.setTimeoutNameInhibitor(bannedSetTimeoutNames),
             INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents),
+            INJECT.jQuerySelectorFilter(filteredJQuerySelectors)
         ],
 
         injectInterval;
@@ -82,10 +90,13 @@
     function scriptInjector(inject) {
         var s = document.createElement('script');
 
-        s.textContent = inject.toString();
+        if (inject.value) {
+            s.textContent = inject.value;
 
-        (document.head || document.documentElement).appendChild(s);
-        s.remove();
+            (document.head || document.documentElement).appendChild(s);
+            s.remove();
+        }
+
         return true;
     }
 
@@ -96,7 +107,7 @@
         function __defineProperty (object, property, propertyList) {
             var propertyListCopy = propertyList.slice();
 
-            // TODO check if 'value' is object
+            // TODO check if 'newValue' is object
             return propertyList.length == 0
                 ? 'Object.defineProperty(' + object + ', "' + property + '", {'
                 + ' value: ' + inject.value + ','
@@ -105,23 +116,23 @@
                 + '});'
 
                 : '(function () {'
-                + ' var __property;'
+                + ' var property;'
                 + ' Object.defineProperty(' + object + ', "' + property + '", {'
                 + '     get: function () {'
-                + '         return __property;'
+                + '         return property;'
                 + '     },'
-                + '     set: function (value) {'
-                + '         var property = value.' + propertyList[0] + ';'
-                + '         delete value.' + propertyList[0] + ';'
-                +           __defineProperty('value', propertyListCopy.shift(), propertyListCopy)
+                + '     set: function (newValue) {'
+                + '         var newProperty = newValue.' + propertyList[0] + ';'
+                + '         delete newValue.' + propertyList[0] + ';'
+                +           __defineProperty('newValue', propertyListCopy.shift(), propertyListCopy)
 
                 + (propertyList.length > 1
-                ? '         if (property !== undefined) {'
-                + '             value.' + propertyList[0] + ' = property;'
+                ? '         if (newProperty !== undefined) {'
+                + '             newValue.' + propertyList[0] + ' = newProperty;'
                 + '         }'
                 : '')
 
-                + '         __property = value;'
+                + '         property = newValue;'
                 + '     }'
                 + ' });'
                 + '})();'
