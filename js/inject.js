@@ -122,6 +122,14 @@ var INJECT = (function () {
 
     _INJECT.fakeFab = '(' + (function () {
         var self = {
+            setOption: function (options, value) {},
+
+            check: function (loop) { return true; },
+
+            emitEvent: function (detected) { return self; },
+
+            clearEvent: function () {},
+
             on: function (detected, fn) {
                 if ( ! detected) {
                    fn();
@@ -136,10 +144,6 @@ var INJECT = (function () {
 
             onNotDetected: function (fn) {
                 return self.on(false, fn);
-            },
-
-            check: function (loop) {
-                return true;
             }
         };
 
