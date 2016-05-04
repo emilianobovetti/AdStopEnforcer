@@ -17,12 +17,12 @@
 # along with FuckFuckAdBlock.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-CHROME_BUILD_DIR=build/chrome
-FIREFOX_BUILD_DIR=build/firefox
-
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-CHROME_BUILD_DIR="$BASE_DIR/$CHROME_BUILD_DIR"
-FIREFOX_BUILD_DIR="$BASE_DIR/$FIREFOX_BUILD_DIR"
+BUILD_DIR="$BASE_DIR/build"
+CHROME_BUILD_DIR="$BUILD_DIR/chrome"
+FIREFOX_BUILD_DIR="$BUILD_DIR/firefox"
+
+rm -rf "$BUILD_DIR"
 
 test -d "$CHROME_BUILD_DIR" || mkdir -p "$CHROME_BUILD_DIR"
 cp -r icons js chrome.manifest.json "$CHROME_BUILD_DIR"
