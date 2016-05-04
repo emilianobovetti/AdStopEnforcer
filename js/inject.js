@@ -36,28 +36,26 @@ var INJECT = (function () {
         },
 
         __setTimeoutInhibitor = function (bannedArray, bannedCondition) {
-            var script;
-
             bannedArray = bannedArray
                 .filter(function (x) { return x.domainCheck; })
                 .map(function (x) { return x.value; });
 
-            if (bannedArray.length > 0) {
-                script = '(function () {'
-                    + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
-                    + '     realSetTimeout = window.setTimeout;'
-
-                    + ' window.setTimeout = function (fn, timeout) {'
-                    + '     var isBanned = false;'
-                    + '     bannedArray.forEach(function (bannedItem) {'
-                    + '         if (' + bannedCondition + ') isBanned = true;'
-                    + '     });'
-                    + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
-                    + ' };'
-                    + '})();';
+            if (bannedArray.length == 0) {
+                return INJECT.value(null);
             }
 
-            return INJECT.value(script);
+            return INJECT.value('(function () {'
+                + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
+                + '     realSetTimeout = window.setTimeout;'
+
+                + ' window.setTimeout = function (fn, timeout) {'
+                + '     var isBanned = false;'
+                + '     bannedArray.forEach(function (bannedItem) {'
+                + '         if (' + bannedCondition + ') isBanned = true;'
+                + '     });'
+                + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
+                + ' };'
+                + '})();');
         };
 
     _INJECT.setTimeoutNameInhibitor = function (bannedSetTimeoutNames) {
@@ -69,53 +67,51 @@ var INJECT = (function () {
     };
 
     _INJECT.jQuerySelectorFilter = function (filteredSelectors) {
-        var script;
-
         filteredSelectors = filteredSelectors.filter(function (x) { return x.domainCheck; });
 
-        if (filteredSelectors.length > 0) {
-            script = '(function () {'
-                + ' var jQuery,'
-                + '     filteredSelectors = [' + filteredSelectors
-                    .reduce(function (acc, x, idx) { return acc + (idx ? ', ' : '') + '{ key: "' + x.key + '", value: ' + x.value + ' }'; }, '') + '];'
-
-                + ' function deepMerge (target, source) {'
-                + '     Object.keys(source).forEach(function (key) {'
-                + '         if (target[key] && typeof target[key] == "object" && source[key] && typeof source[key] == "object") {'
-                + '             target[key] = deepMerge(target[key], source[key]);'
-                + '         } else {'
-                + '             target[key] = source[key];'
-                + '         }'
-                + '     });'
-                + '     return target;'
-                + ' }'
-
-                + ' function jQueryGetter() {'
-                + '     return jQuery;'
-                + ' }'
-
-                + ' function jQuerySetter(realJQuery) {'
-                + '     jQuery = function (selector, context) {'
-                + '         var obj = realJQuery(selector, context);'
-
-                + '         filteredSelectors.forEach(function (item) {'
-                + '             if (selector === item.key) {'
-                + '                 obj = deepMerge(obj, item.value);'
-                + '             }'
-                + '         });'
-                + '         return obj;'
-                + '     };'
-                + '     Object.keys(realJQuery).forEach(function (key) {'
-                + '         jQuery[key] = realJQuery[key];'
-                + '     });'
-                + ' }'
-
-                + ' Object.defineProperty(window, "jQuery", { get: jQueryGetter, set: jQuerySetter });'
-                + ' Object.defineProperty(window, "$", { get: jQueryGetter, set: jQuerySetter });'
-                + '})();'
+        if (filteredSelectors.length == 0) {
+            return INJECT.value(null);
         }
 
-        return INJECT.value(script);
+        return INJECT.value('(function () {'
+            + ' var jQuery,'
+            + '     filteredSelectors = [' + filteredSelectors
+                .reduce(function (acc, x, idx) { return acc + (idx ? ', ' : '') + '{ key: "' + x.key + '", value: ' + x.value + ' }'; }, '') + '];'
+
+            + ' function deepMerge (target, source) {'
+            + '     Object.keys(source).forEach(function (key) {'
+            + '         if (target[key] && typeof target[key] == "object" && source[key] && typeof source[key] == "object") {'
+            + '             target[key] = deepMerge(target[key], source[key]);'
+            + '         } else {'
+            + '             target[key] = source[key];'
+            + '         }'
+            + '     });'
+            + '     return target;'
+            + ' }'
+
+            + ' function jQueryGetter() {'
+            + '     return jQuery;'
+            + ' }'
+
+            + ' function jQuerySetter(realJQuery) {'
+            + '     jQuery = function (selector, context) {'
+            + '         var obj = realJQuery(selector, context);'
+
+            + '         filteredSelectors.forEach(function (item) {'
+            + '             if (selector === item.key) {'
+            + '                 obj = deepMerge(obj, item.value);'
+            + '             }'
+            + '         });'
+            + '         return obj;'
+            + '     };'
+            + '     Object.keys(realJQuery).forEach(function (key) {'
+            + '         jQuery[key] = realJQuery[key];'
+            + '     });'
+            + ' }'
+
+            + ' Object.defineProperty(window, "jQuery", { get: jQueryGetter, set: jQuerySetter });'
+            + ' Object.defineProperty(window, "$", { get: jQueryGetter, set: jQuerySetter });'
+            + '})();');
     };
 
     _INJECT.emptyFunction = 'function () {}';
