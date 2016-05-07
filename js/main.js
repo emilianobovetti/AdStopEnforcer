@@ -61,7 +61,8 @@
          * This can be CPU intensive.
          */
         bannedSetTimeoutContents = [
-            INJECT.value('displayAdBlockMessage', 'forbes.com')
+            INJECT.value('displayAdBlockMessage', 'forbes.com'),
+            INJECT.value('adsbygoogle', 'theplace2.ru')
         ],
 
         /*
