@@ -66,6 +66,47 @@ var INJECT = (function () {
         return __setTimeoutInhibitor(bannedSetTimeoutContents, 'fn.toString().indexOf(bannedItem) > -1');
     };
 
+    _INJECT.windowProperty = function (inject) {
+        var propertyList = inject.key.split('.'),
+            property = propertyList.shift();
+
+        function __defineProperty (object, property, propertyList) {
+            var propertyListCopy = propertyList.slice();
+
+            // TODO check if 'newValue' is object
+            return propertyList.length == 0
+                ? 'Object.defineProperty(' + object + ', "' + property + '", {'
+                + ' value: ' + inject.value + ','
+                + ' writable: false,'
+                + ' configurable: false'
+                + '});'
+
+                : '(function () {'
+                + ' var property;'
+                + ' Object.defineProperty(' + object + ', "' + property + '", {'
+                + '     get: function () {'
+                + '         return property;'
+                + '     },'
+                + '     set: function (newValue) {'
+                + '         var newProperty = newValue.' + propertyList[0] + ';'
+                + '         delete newValue.' + propertyList[0] + ';'
+                +           __defineProperty('newValue', propertyListCopy.shift(), propertyListCopy)
+
+                + (propertyList.length > 1
+                ? '         if (newProperty !== undefined) {'
+                + '             newValue.' + propertyList[0] + ' = newProperty;'
+                + '         }'
+                : '')
+
+                + '         property = newValue;'
+                + '     }'
+                + ' });'
+                + '})();'
+        }
+
+        return __defineProperty('window', property, propertyList);
+    };
+
     _INJECT.jQuerySelectorFilter = function (filteredSelectors) {
         filteredSelectors = filteredSelectors.filter(function (x) { return x.domainCheck; });
 

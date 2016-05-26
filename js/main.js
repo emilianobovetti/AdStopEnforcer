@@ -92,8 +92,10 @@
     function scriptInjector(inject) {
         var s = document.createElement('script');
 
-        if (inject.value) {
-            s.textContent = inject.value;
+        inject = typeof inject == 'string' ? inject : inject.value;
+
+        if (inject) {
+            s.textContent = inject;
 
             (document.head || document.documentElement).appendChild(s);
             s.remove();
@@ -102,45 +104,8 @@
         return true;
     }
 
-    function windowPropertyInjector(inject) {
-        var propertyList = inject.key.split('.'),
-            property = propertyList.shift();
-
-        function __defineProperty (object, property, propertyList) {
-            var propertyListCopy = propertyList.slice();
-
-            // TODO check if 'newValue' is object
-            return propertyList.length == 0
-                ? 'Object.defineProperty(' + object + ', "' + property + '", {'
-                + ' value: ' + inject.value + ','
-                + ' writable: false,'
-                + ' configurable: false'
-                + '});'
-
-                : '(function () {'
-                + ' var property;'
-                + ' Object.defineProperty(' + object + ', "' + property + '", {'
-                + '     get: function () {'
-                + '         return property;'
-                + '     },'
-                + '     set: function (newValue) {'
-                + '         var newProperty = newValue.' + propertyList[0] + ';'
-                + '         delete newValue.' + propertyList[0] + ';'
-                +           __defineProperty('newValue', propertyListCopy.shift(), propertyListCopy)
-
-                + (propertyList.length > 1
-                ? '         if (newProperty !== undefined) {'
-                + '             newValue.' + propertyList[0] + ' = newProperty;'
-                + '         }'
-                : '')
-
-                + '         property = newValue;'
-                + '     }'
-                + ' });'
-                + '})();'
-        }
-
-        return scriptInjector(INJECT.value(__defineProperty('window', property, propertyList)));
+    function windowPropertyInjector(property) {
+        return scriptInjector(INJECT.windowProperty(property));
     }
 
     /*
