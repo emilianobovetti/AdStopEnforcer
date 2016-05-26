@@ -34,8 +34,9 @@
             INJECT.pair('cadetect', INJECT.fakeFab),
             INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
             INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
-            INJECT.pair('is_adblock_detect', 'false'),
             INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
+            INJECT.pair('is_adblock_detect', 'false'),
+            INJECT.pair('adbActive', 'false'),
 
             INJECT.pair('tmgAds.adblock.status', '1', 'telegraph.co.uk'),
             INJECT.pair('fbs_settings.classes', '"WyJhIiwiYiJd"', 'forbes.com'),
