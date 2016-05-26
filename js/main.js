@@ -75,7 +75,7 @@
         ],
 
         /*
-         * Array of INJECT.value() objects which contain javascript
+         * Array of strings which contain javascript
          * to be injected.
          */
         scripts = [
@@ -111,19 +111,23 @@
     /*
      * Run injections
      */
-    function runInjection(injector, toInject) {
-        // run injection for each element in list
-        toInject.forEach(function (element, index) {
+    function runInjection(injector, itemsToInject) {
+        // run injection for each item in list
+        itemsToInject.forEach(function (item, index) {
+            // do we have to inject current item?
+            var injectItem = item && ((item.attempts && item.domainCheck) || typeof item == 'string');
 
-            if ( ! element || ! element.attempts || ! element.domainCheck || injector(element)) {
-                // if current element doesn't have to be injected,
-                // was successfully injected,
-                // or attemps number is 0
+            if (injectItem && ! injector(item)) {
+                // if current item had to be injected,
+                // but injector wasn't able to inject
+                // then decrement attempts
+                item.attempts -= 1;
+            } else {
+                // if current item doesn't have to be injected,
+                // or it was successfully injected,
                 // we can remove it from the list
-                toInject.splice(index, 1);
+                itemsToInject.splice(index, 1);
             }
-
-            element.attempts -= 1;
         });
     }
 

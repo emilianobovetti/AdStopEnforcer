@@ -41,10 +41,10 @@ var INJECT = (function () {
                 .map(function (x) { return x.value; });
 
             if (bannedArray.length == 0) {
-                return INJECT.value(null);
+                return null;
             }
 
-            return INJECT.value('(function () {'
+            return '(function () {'
                 + ' var bannedArray = ["' + bannedArray.join('","') + '"],'
                 + '     realSetTimeout = window.setTimeout;'
 
@@ -55,7 +55,7 @@ var INJECT = (function () {
                 + '     });'
                 + '     if ( ! isBanned) realSetTimeout(fn, timeout);'
                 + ' };'
-                + '})();');
+                + '})();';
         };
 
     _INJECT.setTimeoutNameInhibitor = function (bannedSetTimeoutNames) {
@@ -111,10 +111,10 @@ var INJECT = (function () {
         filteredSelectors = filteredSelectors.filter(function (x) { return x.domainCheck; });
 
         if (filteredSelectors.length == 0) {
-            return INJECT.value(null);
+            return null;
         }
 
-        return INJECT.value('(function () {'
+        return '(function () {'
             + ' var jQuery,'
             + '     filteredSelectors = [' + filteredSelectors
                 .reduce(function (acc, x, idx) { return acc + (idx ? ', ' : '') + '{ key: "' + x.key + '", value: ' + x.value + ' }'; }, '') + '];'
@@ -152,7 +152,7 @@ var INJECT = (function () {
 
             + ' Object.defineProperty(window, "jQuery", { get: jQueryGetter, set: jQuerySetter });'
             + ' Object.defineProperty(window, "$", { get: jQueryGetter, set: jQuerySetter });'
-            + '})();');
+            + '})();';
     };
 
     _INJECT.emptyFunction = 'function () {}';
