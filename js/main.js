@@ -82,9 +82,7 @@
             INJECT.setTimeoutNameInhibitor(bannedSetTimeoutNames),
             INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents),
             INJECT.jQuerySelectorFilter(filteredJQuerySelectors)
-        ],
-
-        injectInterval;
+        ];
 
     /*
      * Injectors
@@ -100,12 +98,10 @@
             (document.head || document.documentElement).appendChild(s);
             s.remove();
         }
-
-        return true;
     }
 
     function windowPropertyInjector(property) {
-        return scriptInjector(INJECT.windowProperty(property));
+        scriptInjector(INJECT.windowProperty(property));
     }
 
     /*
@@ -115,31 +111,17 @@
         // run injection for each item in list
         itemsToInject.forEach(function (item, index) {
             // do we have to inject current item?
-            var injectItem = item && ((item.attempts && item.domainCheck) || typeof item == 'string');
-
-            if (injectItem && ! injector(item)) {
-                // if current item had to be injected,
-                // but injector wasn't able to inject
-                // then decrement attempts
-                item.attempts -= 1;
-            } else {
-                // if current item doesn't have to be injected,
-                // or it was successfully injected,
-                // we can remove it from the list
-                itemsToInject.splice(index, 1);
+            if (item && (item.domainCheck || typeof item == 'string')) {
+                injector(item);
             }
         });
     }
 
-    injectInterval = setInterval(function () {
+    setTimeout(function () {
         // inject all scripts
         runInjection(scriptInjector, scripts);
 
         // inject all window properties
         runInjection(windowPropertyInjector, windowProperties);
-
-        if (scripts.length + windowProperties.length == 0) {
-            clearInterval(injectInterval);
-        }
     }, 10);
 })(document);

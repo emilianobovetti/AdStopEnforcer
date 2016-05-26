@@ -195,8 +195,7 @@ var INJECT = (function () {
     _INJECT.value = function (value, domains) {
         return {
             value: value,
-            domainCheck: __domainCheck(domains),
-            attempts: 10
+            domainCheck: __domainCheck(domains)
         };
     };
 
@@ -204,8 +203,7 @@ var INJECT = (function () {
         return {
             key: key,
             value: value,
-            domainCheck: __domainCheck(domains),
-            attempts: 10
+            domainCheck: __domainCheck(domains)
         };
     };
 
