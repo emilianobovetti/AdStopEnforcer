@@ -17,111 +17,74 @@
  */
 
 /*global
-    document, setInterval, clearInterval, INJECT
+    document, setTimeout, INJECT
  */
 (function (document) {
     'use strict';
 
-        /*
-         * Array of INJECT.pair() objects which contain variabile names
-         * and values to be injected.
-         * They can't be overridden.
-         */
-    var windowProperties = [
-            INJECT.pair('fuckAdBlock', INJECT.fakeFab),
-            INJECT.pair('blockAdBlock', INJECT.fakeFab),
-            INJECT.pair('sniffAdBlock', INJECT.fakeFab),
-            INJECT.pair('cadetect', INJECT.fakeFab),
-            INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
-            INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
-            INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
-            INJECT.pair('is_adblock_detect', 'false'),
-            INJECT.pair('adbActive', 'false'),
-
-            INJECT.pair('tmgAds.adblock.status', '1', 'telegraph.co.uk'),
-            INJECT.pair('fbs_settings.classes', '"WyJhIiwiYiJd"', 'forbes.com'),
-            INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
-            INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
-        ],
-
-        /*
-         * Array of INJECT.value() objects which contain function names
-         * that can't be called through setTimeout().
-         *
-         * Note that setTimeoutNameInhibitor function won't be injected if nothing
-         * have to be injected, so use domain specific values.
-         */
-        bannedSetTimeoutNames = [
-            INJECT.value('adsBlock', 'el-nation.com')
-        ],
-
-        /*
-         * Values in this array cannot appear in code of functions that
-         * are passed to setTimeout().
-         *
-         * This can be CPU intensive.
-         */
-        bannedSetTimeoutContents = [
-            INJECT.value('displayAdBlockMessage', 'forbes.com'),
-            INJECT.value('adsbygoogle', 'theplace2.ru')
-        ],
-
-        /*
-         * Array of INJECT.pair() objects with filtered jQuery selector
-         * and an object of injected properties.
-         */
-        filteredJQuerySelectors = [
-            INJECT.pair('#vipchat', '{ length: 1 }', ['vipbox.tv', 'vipbox.sx'])
-        ],
-
-        /*
-         * Array of strings which contain javascript
-         * to be injected.
-         */
-        scripts = [
-            INJECT.setTimeoutNameInhibitor(bannedSetTimeoutNames),
-            INJECT.setTimeoutContentInhibitor(bannedSetTimeoutContents),
-            INJECT.jQuerySelectorFilter(filteredJQuerySelectors)
-        ];
+    var inject = INJECT.create();
 
     /*
-     * Injectors
+     * Array of INJECT.pair() objects which contain variabile names
+     * and values to be injected.
+     * They can't be overridden.
      */
-    function scriptInjector(inject) {
-        var s = document.createElement('script');
+    inject.windowProperties([
+        INJECT.pair('fuckAdBlock', INJECT.fakeFab),
+        INJECT.pair('blockAdBlock', INJECT.fakeFab),
+        INJECT.pair('sniffAdBlock', INJECT.fakeFab),
+        INJECT.pair('cadetect', INJECT.fakeFab),
+        INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
+        INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
+        INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
+        INJECT.pair('is_adblock_detect', false),
+        INJECT.pair('adbActive', false),
 
-        inject = typeof inject == 'string' ? inject : inject.value;
-
-        if (inject) {
-            s.textContent = inject;
-
-            (document.head || document.documentElement).appendChild(s);
-            s.remove();
-        }
-    }
-
-    function windowPropertyInjector(property) {
-        scriptInjector(INJECT.windowProperty(property));
-    }
+        INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
+        INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
+        INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
+        INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
+    ]);
 
     /*
-     * Run injections
+     * Array of INJECT.value() objects which contain function names
+     * that can't be called through setTimeout().
+     *
+     * Note that setTimeoutNameInhibitor function won't be injected if nothing
+     * have to be injected, so use domain specific values.
      */
-    function runInjection(injector, itemsToInject) {
-        // run injection for each item in list
-        itemsToInject.forEach(function (item, index) {
-            // do we have to inject current item?
-            if (item && (item.domainCheck || typeof item == 'string')) {
-                injector(item);
-            }
-        });
-    }
+    inject.bannedSetTimeoutNames([
+        INJECT.value('adsBlock', 'el-nation.com')
+    ]);
 
+    /*
+     * Values in this array cannot appear in code of functions that
+     * are passed to setTimeout().
+     *
+     * This can be CPU intensive.
+     */
+    inject.bannedSetTimeoutContents([
+        INJECT.value('displayAdBlockMessage', 'forbes.com'),
+        INJECT.value('adsbygoogle', 'theplace2.ru')
+    ]);
+
+    /*
+     * Array of INJECT.pair() objects with filtered jQuery selector
+     * and an object of injected properties.
+     */
+    inject.jQuerySelectors([
+        INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
+    ]);
+
+    /*
+     * Run injection
+     */
     setTimeout(function () {
-        // inject all scripts
-        runInjection(scriptInjector, scripts);
+        var scriptElement = document.createElement('script'),
+            scriptContent = inject.script.render();
 
-        // inject all window properties
-        runInjection(windowPropertyInjector, windowProperties);
+        scriptElement.textContent = scriptContent;
+        (document.head || document.documentElement).appendChild(scriptElement);
+        scriptElement.remove();
     }, 10);
 })(document);
