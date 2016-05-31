@@ -17,12 +17,16 @@
  */
 
 /*global
-    document, setTimeout, INJECT
+    INJECT
  */
-(function (document) {
+(function () {
     'use strict';
 
     var inject = INJECT.create();
+
+    console.log('\t/////////////////////\r\n',
+                '\t// FuckFuckAdBlock //\r\n',
+                '\t/////////////////////\r\n');
 
     inject.windowProperties([
         INJECT.pair('testNull', null),
@@ -48,7 +52,10 @@
         INJECT.pair('#testIdSelector', { length: 1 })
     ]);
 
-    function assertEquals(expected, actual) {
+    /*
+     * Functions
+     */
+    inject.script.pushFunction(function assertEquals (expected, actual) {
         if (expected !== actual) {
             throw new Error('Expected '
                 + JSON.stringify(expected)
@@ -56,57 +63,60 @@
                 + JSON.stringify(actual)
                 + '\r\n' + assertEquals.caller);
         }
-    }
+    });
 
-    function testNullImmutable() {
+    /*
+     * Test window property injection
+     */
+    inject.script.pushSelfInvoking(function testNullImmutable () {
         testNull = {};
 
         assertEquals(null, testNull);
-    }
+    });
 
-    function testUndefinedImmutable() {
+    inject.script.pushSelfInvoking(function testUndefinedImmutable () {
         testUndefined = {};
 
         assertEquals(undefined, testUndefined);
-    }
+    });
 
-    function testTrueImmutable() {
+    inject.script.pushSelfInvoking(function testTrueImmutable () {
         testTrue = {};
 
         assertEquals(true, testTrue);
-    }
+    });
 
-    function testFalseImmutable() {
+    inject.script.pushSelfInvoking(function testFalseImmutable () {
         testFalse = {};
 
         assertEquals(false, testFalse);
-    }
+    });
 
-    function testNumberOneImmutable() {
+    inject.script.pushSelfInvoking(function testNumberOneImmutable () {
         testNumberOne = {};
 
         assertEquals(1, testNumberOne);
-    }
+    });
 
-    function testStringImmutable() {
+    inject.script.pushSelfInvoking(function testStringImmutable () {
         testString = {};
 
         assertEquals('string', testString);
-    }
+    });
 
-    function testEmptyFunctionImmutable() {
+    inject.script.pushSelfInvoking(function testEmptyFunctionImmutable () {
         testEmptyFunction = {};
 
         assertEquals('function () {}', testEmptyFunction.toString());
-    }
+    });
 
-    function testEmptyObjectImmutable() {
+    inject.script.pushSelfInvoking(function testEmptyObjectImmutable () {
         testEmptyObject = null;
 
         assertEquals('{}', JSON.stringify(testEmptyObject));
-    }
+    });
 
-    function testNestedPropertyImmutable() {
+    inject.script.pushSelfInvoking(function testNestedPropertyImmutable () {
         test = {};
         test.nested = {};
         test.nested.property = {};
@@ -118,15 +128,18 @@
         test = { nested: { property: 1 } };
 
         assertEquals(null, test.nested.property);
-    }
+    });
 
-    function testSetTimeoutBannedName () {
+    /*
+     * Test setTimeout injection
+     */
+    inject.script.pushSelfInvoking(function testSetTimeoutBannedName () {
         setTimeout(function setTimeoutBannedName() {
             throw new Error('Able to call banned setTimeout name');
         }, 1);
-    }
+    });
 
-    function testSetTimeoutAllowedName () {
+    inject.script.pushSelfInvoking(function testSetTimeoutAllowedName () {
         var called = false;
 
         setTimeout(function setTimeoutAllowedName() {
@@ -138,17 +151,20 @@
                 throw new Error('Unable to call allowed setTimeout name');
             }
         }, 2);
-    }
+    });
 
-    function testSetTimeoutBannedContent () {
+    inject.script.pushSelfInvoking(function testSetTimeoutBannedContent () {
         setTimeout(function () {
             var setTimeoutBannedContent;
 
             throw new Error('Able to call function with setTimeout banned content');
         }, 1);
-    }
+    });
 
-    function testJQuerySelectors () {
+    /*
+     * Test jQuery injection
+     */
+    inject.script.pushSelfInvoking(function testJQuerySelectors () {
         window.onload = function () {
             if (typeof $ !== undefined) {
                 assertEquals(1, $('#testIdSelector').length);
@@ -156,33 +172,10 @@
                 console.log('jQuery not loaded');
             }
         }
-    }
+    });
 
-    setTimeout(function () {
-        var scriptElement = document.createElement('script'),
-            script = inject.script;
+    //inject.debug = true;
 
-        script.pushFunction(assertEquals);
+    inject.run();
 
-        script.pushSelfInvoking(testNullImmutable);
-        script.pushSelfInvoking(testUndefinedImmutable);
-        script.pushSelfInvoking(testTrueImmutable);
-        script.pushSelfInvoking(testFalseImmutable);
-        script.pushSelfInvoking(testNumberOneImmutable);
-        script.pushSelfInvoking(testStringImmutable);
-        script.pushSelfInvoking(testEmptyFunctionImmutable);
-        script.pushSelfInvoking(testEmptyObjectImmutable);
-        script.pushSelfInvoking(testNestedPropertyImmutable);
-
-        script.pushSelfInvoking(testSetTimeoutBannedName);
-        script.pushSelfInvoking(testSetTimeoutAllowedName);
-        script.pushSelfInvoking(testSetTimeoutBannedContent);
-
-        script.pushSelfInvoking(testJQuerySelectors);
-
-        scriptElement.textContent = script.render();
-
-        (document.head || document.documentElement).appendChild(scriptElement);
-        scriptElement.remove();
-    }, 10);
-})(document);
+})();

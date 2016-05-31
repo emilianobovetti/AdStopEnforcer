@@ -17,9 +17,9 @@
  */
 
 /*global
-    document, setTimeout, INJECT
+    INJECT
  */
-(function (document) {
+(function () {
     'use strict';
 
     var inject = INJECT.create();
@@ -76,15 +76,8 @@
         INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
     ]);
 
-    /*
-     * Run injection
-     */
-    setTimeout(function () {
-        var scriptElement = document.createElement('script'),
-            scriptContent = inject.script.render();
+    inject.debug = true;
 
-        scriptElement.textContent = scriptContent;
-        (document.head || document.documentElement).appendChild(scriptElement);
-        scriptElement.remove();
-    }, 10);
-})(document);
+    inject.run();
+
+})();

@@ -34,28 +34,28 @@ var SCRIPT = (function () {
         };
 
         self.pushAssignment = function (name, expression) {
-            self.assignments.push('var ' + name + ' = ' + expression + ';');
+            self.assignments.push('var ' + name + ' = ' + expression + ';\r\n');
 
             return self;
         };
 
         self.pushFunction = function (fn) {
-            self.functions.push(fn.toString());
+            self.functions.push(fn.toString() + '\r\n');
 
             return self;
         };
 
         self.pushSelfInvoking = function (fn) {
-            self.statements.push('(' + fn.toString() + ')();');
+            self.statements.push('(' + fn.toString() + ')();\r\n');
 
             return self;
         };
 
         self.render = function () {
             return '(function () {"use strict";\r\n'
-                + self.assignments.join('\r\n')
-                + self.functions.join('\r\n')
-                + self.statements.join('\r\n') + '})();';
+                + self.assignments.join('')
+                + self.functions.join('')
+                + self.statements.join('') + '\r\n})();';
         };
 
         return self;

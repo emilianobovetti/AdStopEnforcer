@@ -17,15 +17,25 @@
  */
 
 /*global
-    document
+    document, SCRIPT
  */
 var INJECT = (function (document) {
     'use strict';
 
     var _INJECT = INJECT || {};
 
+    _INJECT.raw = function (value) {
+        return { raw: value };
+    };
+
+    _INJECT.emptyFunction = function () {};
+
+    _INJECT.fakeFab = _INJECT.raw('fakeFab');
+
+    _INJECT.fakeFabConstructor = _INJECT.raw('fakeFabConstructor');
+
     function injectArrayToString (array) {
-        array = array.filter(function (x) { return x && x.domainCheck });
+        array = array.filter(function (x) { return x && x.domainCheck; });
 
         return '[' + array.reduce(function (acc, x, idx) {
                 return acc + (idx ? ',' : '') + x.toString()
@@ -60,7 +70,19 @@ var INJECT = (function (document) {
         });
     }
 
-    function fakeFab () {
+    function deepMerge (target, source) {
+        Object.keys(source).forEach(function (key) {
+            if (target[key] && typeof target[key] == 'object' && source[key] && typeof source[key] == 'object') {
+                target[key] = deepMerge(target[key], source[key]);
+            } else {
+                target[key] = source[key];
+            }
+        });
+
+        return target;
+    }
+
+    function fakeFabConstructor () {
         var self = {
             setOption: function (options, value) {},
 
@@ -90,21 +112,11 @@ var INJECT = (function (document) {
         return self;
     }
 
-    function deepMerge (target, source) {
-        Object.keys(source).forEach(function (key) {
-            if (target[key] && typeof target[key] == 'object' && source[key] && typeof source[key] == 'object') {
-                target[key] = deepMerge(target[key], source[key]);
-            } else {
-                target[key] = source[key];
-            }
-        });
-
-        return target;
-    }
-
     function injectWindowProperties () {
         windowProperties.forEach(function (property) {
             defineImmutableProperty(window, property.key, property.value);
+
+            window[property.key.split('.').shift()] = undefined;
         });
     }
 
@@ -116,15 +128,11 @@ var INJECT = (function (document) {
                 var isBanned = false;
 
                 bannedSetTimeoutNames.forEach(function (bannedName) {
-                    if (fn.name === bannedName.value) {
-                        isBanned = true;
-                    }
+                    isBanned = isBanned || fn.name === bannedName.value;
                 });
 
                 bannedSetTimeoutContents.forEach(function (bannedContent) {
-                    if (fn.toString().indexOf(bannedContent.value) > -1) {
-                        isBanned = true;
-                    }
+                    isBanned = isBanned || fn.toString().indexOf(bannedContent.value) > -1;
                 });
 
                 if (isBanned === false) {
@@ -186,9 +194,26 @@ var INJECT = (function (document) {
             self.script.pushAssignment('jQuerySelectors', injectArrayToString(selectors));
         };
 
-        self.script.pushAssignment('fakeFab', '(' + fakeFab.toString() + ')()');
+        self.run = function () {
+            setTimeout(function () {
+                var scriptElement = document.createElement('script');
 
-        self.script.pushAssignment('fakeFabConstructor', 'function () { return fakeFab; }');
+                scriptElement.textContent = self.script.render();
+
+                if (self.debug === true) {
+                    console.log(scriptElement.textContent);
+                }
+
+                (document.head || document.documentElement).appendChild(scriptElement);
+                scriptElement.remove();
+            }, 10);
+
+            return self;
+        }
+
+        self.script.pushAssignment('fakeFab', 'fakeFabConstructor()');
+
+        self.script.pushFunction(fakeFabConstructor);
 
         self.script.pushFunction(defineImmutableProperty);
 
@@ -203,66 +228,57 @@ var INJECT = (function (document) {
         return self;
     };
 
-    _INJECT.raw = function (value) {
-        return { raw: value };
-    };
-
-    _INJECT.emptyFunction = function () {};
-
-    _INJECT.fakeFab = _INJECT.raw('fakeFab');
-
-    _INJECT.fakeFabConstructor = _INJECT.raw('fakeFabConstructor');
-
     /*
      * inject object initializer
      */
-    function domainCheck (domains) {
-        // if domains is a falsy value we want to
-        // inject the object (check = true)
-        var check = ! domains;
-
-        domains = check ? [] : (typeof domains == 'string') ? [domains] : domains;
-
-        domains.forEach(function (domain) {
-            check = check || document.location.hostname.endsWith(domain);
-        });
-
-        return check;
-    }
-
     _INJECT.value = function (value, domains) {
-        var self = {
-            value: value,
-            domainCheck: domainCheck(domains),
-            toString: function() {
-                var output = '{';
+        var self = {};
 
-                Object.keys(self).forEach(function (property) {
-                    var value = self[property];
+        self.value = value;
 
-                    if (['domainCheck', 'toString'].indexOf(property) > -1) {
-                        return;
-                    }
+        self.domainCheck = (function () {
+            // if domains is a falsy value we want to
+            // inject the object (check = true)
+            var check = ! domains;
 
-                    output += (output.length > 1 ? ',"' : '"') + property + '":';
+            domains = check ? [] : (typeof domains == 'string') ? [domains] : domains;
 
-                    if (value === null) {
-                        output += 'null';
-                    } else if (value === undefined) {
-                        output += 'undefined';
-                    } else if (value.raw) {
-                        output += value.raw;
-                    } else if (typeof value == 'function') {
-                        output += value.toString();
-                    } else {
-                        output += JSON.stringify(value);
-                    }
-                });
+            domains.forEach(function (domain) {
+                check = check || document.location.hostname.endsWith(domain);
+            });
 
-                output += '}';
+            return check;
+        })();
 
-                return output;
-            }
+        self.toString = function() {
+            var output = '{';
+
+            Object.keys(self).forEach(function (property) {
+                var value = self[property];
+
+                // skip these properties
+                if (['domainCheck', 'toString'].indexOf(property) > -1) {
+                    return;
+                }
+
+                output += (output.length > 1 ? ',"' : '"') + property + '":';
+
+                if (value === null) {
+                    output += 'null';
+                } else if (value === undefined) {
+                    output += 'undefined';
+                } else if (value.raw) {
+                    output += value.raw;
+                } else if (typeof value == 'function') {
+                    output += value.toString();
+                } else {
+                    output += JSON.stringify(value);
+                }
+            });
+
+            output += '}';
+
+            return output;
         };
 
         return self;
