@@ -85,6 +85,10 @@
     /*
      * Test window property injection
      */
+    inject.script.pushSelfInvoking(function testDefined () {
+        assertEquals(true, testTrue);
+    });
+
     inject.script.pushSelfInvoking(function testNullImmutable () {
         testNull = {};
 
