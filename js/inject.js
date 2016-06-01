@@ -17,30 +17,12 @@
  */
 
 /*global
-    document, SCRIPT
+    document, console, SCRIPT
  */
 var INJECT = (function (document) {
     'use strict';
 
     var _INJECT = INJECT || {};
-
-    _INJECT.raw = function (value) {
-        return { raw: value };
-    };
-
-    _INJECT.emptyFunction = function () {};
-
-    _INJECT.fakeFab = _INJECT.raw('fakeFab');
-
-    _INJECT.fakeFabConstructor = _INJECT.raw('fakeFabConstructor');
-
-    function injectArrayToString (array) {
-        array = array.filter(function (x) { return x && x.domainCheck; });
-
-        return '[' + array.reduce(function (acc, x, idx) {
-                return acc + (idx ? ',' : '') + x.toString()
-            }, '') + ']';
-    }
 
     function defineImmutableProperty (object, key, value) {
         var keyList = typeof key == 'string' ? key.split('.') : key,
@@ -120,25 +102,41 @@ var INJECT = (function (document) {
         });
     }
 
+    function injectSetAttribute () {
+        var realSetAttribute = Element.prototype.setAttribute;
+
+        Element.prototype.setAttribute = function (name, value) {
+            var isBanned = false;
+
+            if (name === 'class') {
+                isBanned = value.split(' ').reduce(function (acc, item) {
+                    return acc || baitClasses.indexOf(item) > -1;
+                }, false);
+            }
+
+            isBanned || realSetAttribute.call(this, name, value);
+        };
+    }
+
     function injectSetTimeout () {
-        var realSetTimeout = window.setTimeout.bind(window);
+        var realSetTimeout = window.setTimeout;
 
         if (bannedSetTimeoutNames.length + bannedSetTimeoutContents.length > 0) {
             window.setTimeout = function (fn, timeout) {
                 var isBanned = false;
 
                 bannedSetTimeoutNames.forEach(function (bannedName) {
-                    isBanned = isBanned || fn.name === bannedName.value;
+                    isBanned = isBanned || fn.name === bannedName;
                 });
 
                 bannedSetTimeoutContents.forEach(function (bannedContent) {
-                    isBanned = isBanned || fn.toString().indexOf(bannedContent.value) > -1;
+                    isBanned = isBanned || fn.toString().indexOf(bannedContent) > -1;
                 });
 
-                if (isBanned === false) {
-                    realSetTimeout(fn, timeout);
-                }
-            }
+                isBanned || realSetTimeout(fn instanceof Function ? function() {
+                        fn.apply(null, Array.prototype.slice.call(arguments, 2));
+                    } : fn, timeout);
+            };
         }
     }
 
@@ -173,6 +171,14 @@ var INJECT = (function (document) {
         }
     }
 
+    function injectArrayToString (array) {
+        array = array.filter(function (x) { return x && x.domainCheck; });
+
+        return '[' + array.reduce(function (acc, item, idx) {
+                return acc + (idx ? ',' : '') + item.toString()
+            }, '') + ']';
+    }
+
     _INJECT.create = function () {
         var self = {};
 
@@ -180,6 +186,10 @@ var INJECT = (function (document) {
 
         self.windowProperties = function (properties) {
             self.script.pushAssignment('windowProperties', injectArrayToString(properties));
+        };
+
+        self.baitClasses = function (classes) {
+            self.script.pushAssignment('baitClasses', injectArrayToString(classes));
         };
 
         self.bannedSetTimeoutNames = function (names) {
@@ -209,7 +219,7 @@ var INJECT = (function (document) {
             }, 10);
 
             return self;
-        }
+        };
 
         self.script.pushAssignment('fakeFab', 'fakeFabConstructor()');
 
@@ -221,6 +231,8 @@ var INJECT = (function (document) {
 
         self.script.pushSelfInvoking(injectWindowProperties);
 
+        self.script.pushSelfInvoking(injectSetAttribute);
+
         self.script.pushSelfInvoking(injectSetTimeout);
 
         self.script.pushSelfInvoking(injectJQuery);
@@ -228,9 +240,33 @@ var INJECT = (function (document) {
         return self;
     };
 
+    _INJECT.raw = function (value) {
+        return { raw: value };
+    };
+
+    _INJECT.emptyFunction = function () {};
+
+    _INJECT.fakeFab = _INJECT.raw('fakeFab');
+
+    _INJECT.fakeFabConstructor = _INJECT.raw('fakeFabConstructor');
+
     /*
      * inject object initializer
      */
+    function valueToString (value) {
+        if (value === null) {
+            return 'null';
+        } else if (value === undefined) {
+            return 'undefined';
+        } else if (value.raw) {
+            return value.raw;
+        } else if (typeof value == 'function') {
+            return value.toString();
+        } else {
+            return JSON.stringify(value);
+        }
+    }
+
     _INJECT.value = function (value, domains) {
         var self = {};
 
@@ -251,34 +287,7 @@ var INJECT = (function (document) {
         })();
 
         self.toString = function() {
-            var output = '{';
-
-            Object.keys(self).forEach(function (property) {
-                var value = self[property];
-
-                // skip these properties
-                if (['domainCheck', 'toString'].indexOf(property) > -1) {
-                    return;
-                }
-
-                output += (output.length > 1 ? ',"' : '"') + property + '":';
-
-                if (value === null) {
-                    output += 'null';
-                } else if (value === undefined) {
-                    output += 'undefined';
-                } else if (value.raw) {
-                    output += value.raw;
-                } else if (typeof value == 'function') {
-                    output += value.toString();
-                } else {
-                    output += JSON.stringify(value);
-                }
-            });
-
-            output += '}';
-
-            return output;
+            return valueToString(self.value);
         };
 
         return self;
@@ -288,6 +297,23 @@ var INJECT = (function (document) {
         var self = _INJECT.value(value, domains);
 
         self.key = key;
+
+        self.toString = function() {
+            var out = '{';
+
+            Object.keys(self).forEach(function (property) {
+                // skip these properties
+                if (['domainCheck', 'toString'].indexOf(property) > -1) {
+                    return;
+                }
+
+                out += (out.length > 1 ? ',"' : '"') + property + '":' + valueToString(self[property]);
+            });
+
+            out += '}';
+
+            return out;
+        };
 
         return self;
     };

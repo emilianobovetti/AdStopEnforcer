@@ -42,16 +42,28 @@
 
         INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
         INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
-        INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'),
+        INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'), // TODO
         INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
+    ]);
+
+    /*
+     * Array of INJECT.value() objects which contain bait classes.
+     */
+    inject.baitClasses([
+        INJECT.value('pub_300x250'),
+        INJECT.value('pub_300x250m'),
+        INJECT.value('pub_728x90'),
+        INJECT.value('text-ad'),
+        INJECT.value('textAd'),
+        INJECT.value('text_ad'),
+        INJECT.value('text_ads'),
+        INJECT.value('text-ads'),
+        INJECT.value('text-ad-links')
     ]);
 
     /*
      * Array of INJECT.value() objects which contain function names
      * that can't be called through setTimeout().
-     *
-     * Note that setTimeoutNameInhibitor function won't be injected if nothing
-     * have to be injected, so use domain specific values.
      */
     inject.bannedSetTimeoutNames([
         INJECT.value('adsBlock', 'el-nation.com')
@@ -60,8 +72,6 @@
     /*
      * Values in this array cannot appear in code of functions that
      * are passed to setTimeout().
-     *
-     * This can be CPU intensive.
      */
     inject.bannedSetTimeoutContents([
         INJECT.value('displayAdBlockMessage', 'forbes.com'),
@@ -75,8 +85,6 @@
     inject.jQuerySelectors([
         INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
     ]);
-
-    inject.debug = true;
 
     inject.run();
 

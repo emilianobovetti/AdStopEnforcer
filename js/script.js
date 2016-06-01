@@ -16,9 +16,6 @@
  *
  */
 
-/*global
-    document
- */
 var SCRIPT = (function () {
     'use strict';
 

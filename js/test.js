@@ -17,16 +17,18 @@
  */
 
 /*global
-    INJECT
+    console, INJECT
  */
 (function () {
     'use strict';
 
     var inject = INJECT.create();
 
-    console.log('\t/////////////////////\r\n',
-                '\t// FuckFuckAdBlock //\r\n',
-                '\t/////////////////////\r\n');
+    inject.debug = false;
+
+    console.log('\t////////////////////////////////\r\n',
+                '\t// FuckFuckAdBlock test suite //\r\n',
+                '\t////////////////////////////////\r\n');
 
     inject.windowProperties([
         INJECT.pair('testNull', null),
@@ -38,6 +40,11 @@
         INJECT.pair('testEmptyFunction', function () {}),
         INJECT.pair('testEmptyObject', {}),
         INJECT.pair('test.nested.property', null)
+    ]);
+
+    inject.baitClasses([
+        INJECT.value('testBaitClass1'),
+        INJECT.value('testBaitClass2')
     ]);
 
     inject.bannedSetTimeoutNames([
@@ -56,13 +63,23 @@
      * Functions
      */
     inject.script.pushFunction(function assertEquals (expected, actual) {
-        if (expected !== actual) {
-            throw new Error('Expected '
-                + JSON.stringify(expected)
-                + ', found '
-                + JSON.stringify(actual)
-                + '\r\n' + assertEquals.caller);
+        var callerName;
+
+        if (expected === actual) {
+            return;
         }
+
+        try {
+            throw new Error();
+        } catch (e) {
+            callerName = e.stack.split('at')[2].trim();
+        }
+
+        throw new Error('Expected '
+            + JSON.stringify(expected)
+            + ', found '
+            + JSON.stringify(actual)
+            + ' in ' + callerName);
     });
 
     /*
@@ -131,6 +148,33 @@
     });
 
     /*
+     * Test bait classes injection
+     */
+    inject.script.pushSelfInvoking(function testBannedBaitClass () {
+        var bait = document.createElement('div');
+
+        bait.setAttribute('class', 'testBaitClass1');
+
+        assertEquals(null, bait.getAttribute('class'));
+    });
+
+    inject.script.pushSelfInvoking(function testAllowedClass () {
+        var bait = document.createElement('div');
+
+        bait.setAttribute('class', 'allowed classes');
+
+        assertEquals('allowed classes', bait.getAttribute('class'));
+    });
+
+    inject.script.pushSelfInvoking(function testMultipleBannedClasses () {
+        var bait = document.createElement('div');
+
+        bait.setAttribute('class', 'class1 class2 testBaitClass2 class3 class4');
+
+        assertEquals(null, bait.getAttribute('class'));
+    });
+
+    /*
      * Test setTimeout injection
      */
     inject.script.pushSelfInvoking(function testSetTimeoutBannedName () {
@@ -173,8 +217,6 @@
             }
         }
     });
-
-    //inject.debug = true;
 
     inject.run();
 
