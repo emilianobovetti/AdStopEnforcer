@@ -26,8 +26,7 @@
             "js": [
                 "js/script.js",
                 "js/inject.js",
-                "js/main.js",
-                "js/test.js"
+                "js/main.js"
             ]
         }
     ]

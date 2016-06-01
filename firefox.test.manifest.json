@@ -5,6 +5,13 @@
     "short_name": "FFAB",
     "description": "Prevent boring messages like \"disable AdBlock and refresh page to continue\"",
     "author": "Emiliano Bovetti",
+    "applications": {
+        "gecko": {
+            "id": "FuckFuckAdBlock@yandex.com",
+            "strict_min_version": "24.9",
+            "strict_max_version": "*"
+        }
+    },
     "icons": {
         "16": "icons/icon16.png",
         "48": "icons/icon48.png",
@@ -19,7 +26,8 @@
             "js": [
                 "js/script.js",
                 "js/inject.js",
-                "js/main.js"
+                "js/main.js",
+                "js/test.js"
             ]
         }
     ]
