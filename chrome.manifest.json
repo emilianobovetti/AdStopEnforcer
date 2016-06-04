@@ -1,15 +1,18 @@
 {
-    "name": "FuckFuckAdBlock",
-    "version": "0.4.0",
     "manifest_version": 2,
+    "name": "FuckFuckAdBlock",
     "short_name": "FFAB",
+    "version": "0.4.0",
+
     "description": "Prevent boring messages like \"disable AdBlock and refresh page to continue\"",
+    "homepage_url": "https://github.com/emilianobovetti/FuckFuckAdBlock",
     "author": "Emiliano Bovetti",
     "icons": {
-        "16": "icons/icon16.png",
-        "48": "icons/icon48.png",
-        "128": "icons/icon128.png"
+        "16": "icons/logo-16.png",
+        "48": "icons/logo-48.png",
+        "128": "icons/logo-128.png"
     },
+
     "content_scripts": [
         {
             "run_at": "document_start",
@@ -17,10 +20,20 @@
                 "<all_urls>"
             ],
             "js": [
-                "js/script.js",
-                "js/inject.js",
-                "js/main.js"
+                "engine/script.js",
+                "engine/inject.js",
+                "engine/main.js"
             ]
         }
-    ]
+    ],
+
+    "permissions": [
+        "storage"
+    ],
+
+    "browser_action": {
+        "default_icon": "icons/logo-32.png",
+        "default_title": "FuckFuckAdBlock",
+        "default_popup": "popup/mode_select.html"
+    }
 }

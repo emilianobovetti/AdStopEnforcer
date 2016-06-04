@@ -27,13 +27,13 @@ MANIFEST="manifest.json"
 if [ "$1" = "test" ]; then MANIFEST="test.$MANIFEST"; fi
 
 rm -rf "$BUILD_DIR"
-
 test -d "$CHROME_BUILD_DIR" || mkdir -p "$CHROME_BUILD_DIR"
-cp -r icons js "chrome.$MANIFEST" "$CHROME_BUILD_DIR"
-mv "$CHROME_BUILD_DIR/chrome.$MANIFEST" "$CHROME_BUILD_DIR/manifest.json"
-
 test -d "$FIREFOX_BUILD_DIR" || mkdir -p "$FIREFOX_BUILD_DIR"
-cp -r icons js "firefox.$MANIFEST" "$FIREFOX_BUILD_DIR"
+
+cp -r icons engine popup "chrome.$MANIFEST" "$CHROME_BUILD_DIR"
+cp -r icons engine popup "firefox.$MANIFEST" "$FIREFOX_BUILD_DIR"
+
+mv "$CHROME_BUILD_DIR/chrome.$MANIFEST" "$CHROME_BUILD_DIR/manifest.json"
 mv "$FIREFOX_BUILD_DIR/firefox.$MANIFEST" "$FIREFOX_BUILD_DIR/manifest.json"
 
 cd "$CHROME_BUILD_DIR" && zip ../chrome.zip -r .

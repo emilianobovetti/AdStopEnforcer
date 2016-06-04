@@ -184,23 +184,23 @@ var INJECT = (function (document) {
 
         self.script = SCRIPT.create();
 
-        self.windowProperties = function (properties) {
+        self.setWindowProperties = function (properties) {
             self.script.pushAssignment('windowProperties', injectArrayToString(properties));
         };
 
-        self.baitClasses = function (classes) {
+        self.setBaitClasses = function (classes) {
             self.script.pushAssignment('baitClasses', injectArrayToString(classes));
         };
 
-        self.bannedSetTimeoutNames = function (names) {
+        self.setBannedSetTimeoutNames = function (names) {
             self.script.pushAssignment('bannedSetTimeoutNames', injectArrayToString(names));
         };
 
-        self.bannedSetTimeoutContents = function (contents) {
+        self.setBannedSetTimeoutContents = function (contents) {
             self.script.pushAssignment('bannedSetTimeoutContents', injectArrayToString(contents));
         };
 
-        self.jQuerySelectors = function (selectors) {
+        self.setJQuerySelectors = function (selectors) {
             self.script.pushAssignment('jQuerySelectors', injectArrayToString(selectors));
         };
 

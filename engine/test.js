@@ -24,11 +24,11 @@
 
     var inject = INJECT.create();
 
-    inject.debug = false;
-
     console.log('\t////////////////////////////////\r\n',
                 '\t// FuckFuckAdBlock test suite //\r\n',
                 '\t////////////////////////////////\r\n');
+
+    inject.debug = false;
 
     inject.windowProperties([
         INJECT.pair('testNull', null),

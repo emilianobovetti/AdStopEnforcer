@@ -1,0 +1,32 @@
+html, body {
+  height: 95px;
+  width: 300px;
+  margin: 0;
+  padding: 5px 0;
+  overflow: hidden;
+}
+
+.mode {
+  height: 90px;
+  width: 90px;
+  line-height: 90px;
+  margin-left: 5px;
+  margin-right: 5px;
+  border-radius: 100%;
+  text-align: center;
+  vertical-align: middle;
+  float: left;
+  cursor: pointer;
+  color: #636363;
+  background-color: #F5F5F5;
+  font-size: medium;
+  font-weight: normal;
+}
+
+#experimental-mode {
+  font-size: small;
+}
+
+.active {
+  background-color: #cdcddc;
+}
