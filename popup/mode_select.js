@@ -1,3 +1,20 @@
+/*
+ * This file is part of FuckFuckAdBlock.
+ *
+ * FuckFuckAdBlock is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * FuckFuckAdBlock is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with FuckFuckAdBlock.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 
 document.addEventListener('DOMContentLoaded', function() {
     var offModeButton = document.getElementById('off-mode'),
@@ -23,39 +40,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function switchToOffMode () {
-        chrome.storage.local.set({ 'mode': 'off' });
+        localStorage.setItem('mode', 'off');
 
         offModeButtonActive();
     }
 
     function switchToNormalMode () {
-        chrome.storage.local.set({ 'mode': 'normal' });
+        localStorage.setItem('mode', 'normal');
 
         normalModeButtonActive();
     }
 
     function switchToExperimentalMode () {
-        chrome.storage.local.set({ 'mode': 'experimental' });
+        localStorage.setItem('mode', 'experimental');
 
         experimentalModeButtonActive();
     }
 
-    chrome.storage.local.get('mode', function (result) {
-        switch (result.mode) {
-            case 'off':
-                offModeButtonActive();
-                break;
-            case 'normal':
-                normalModeButtonActive();
-                break;
-            case 'experimental':
-                experimentalModeButtonActive();
-                break;
-            default:
-                switchToNormalMode();
-                break;
-        }
-    });
+    switch (localStorage.getItem('mode')) {
+        case 'off':
+            offModeButtonActive();
+            break;
+        case 'normal':
+            normalModeButtonActive();
+            break;
+        case 'experimental':
+            experimentalModeButtonActive();
+            break;
+        default:
+            switchToNormalMode();
+            break;
+    }
 
     offModeButton.addEventListener('click', switchToOffMode);
 

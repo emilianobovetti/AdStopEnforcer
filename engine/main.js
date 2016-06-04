@@ -86,8 +86,11 @@
             INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
         ];
 
-    chrome.storage.local.get('mode', function (result) {
-        switch (result.mode || 'normal') {
+    chrome.runtime.sendMessage({ storage: 'mode' }, function (result) {
+        // TODO
+        console.log((result.storage || 'normal') + ' mode');
+
+        switch (result.storage || 'normal') {
             case 'experimental':
             case 'normal':
                 inject.setWindowProperties(windowProperties);
@@ -95,6 +98,7 @@
                 inject.setBannedSetTimeoutNames(bannedSetTimeoutNames);
                 inject.setBannedSetTimeoutContents(bannedSetTimeoutContents);
                 inject.setJQuerySelectors(jQuerySelectors);
+
                 inject.run();
             case 'off':
             default: break;

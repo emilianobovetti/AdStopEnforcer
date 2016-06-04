@@ -1,9 +1,10 @@
-html, body {
+body {
   height: 95px;
   width: 300px;
   margin: 0;
   padding: 5px 0;
   overflow: hidden;
+  font-family: sans-serif;
 }
 
 .mode {
