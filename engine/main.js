@@ -101,6 +101,7 @@
             INJECT.value('sponsor'),
             INJECT.value('annonse'),
             INJECT.value('sky-left'),
+            INJECT.value('upperMpu'),
             INJECT.value('openx-slc')
         ];
 

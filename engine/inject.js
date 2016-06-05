@@ -228,6 +228,35 @@ var INJECT = (function (document) {
         };
     });
 
+    script.pushSelfInvoking(function injectCreateElement () {
+        var realCreateElement = document.createElement.bind(document);
+
+        if (mode !== 'experimental') {
+            return;
+        }
+
+        document.createElement = function (tagName) {
+            var realElement = realCreateElement(tagName),
+                elementId;
+
+            Object.defineProperty(realElement, 'id', {
+                get: function () {
+                    return elementId;
+                },
+
+                set: function (newId) {
+                    elementId = newId;
+
+                    filteredIdContents.reduce(function (acc, item) {
+                        return acc || newId.indexOf(item) > -1;
+                    }, false) || realElement.setAttribute('id', newId)
+                }
+            });
+
+            return realElement;
+        };
+    });
+
     script.pushSelfInvoking(function injectGetComputedStyle () {
         var realGetComputedStyle = window.getComputedStyle;
 

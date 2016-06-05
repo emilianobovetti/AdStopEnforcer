@@ -85,7 +85,7 @@
 
             successfulAssertionCounter++;
         } else {
-            console.log('Assertion error.',
+            console.error('Assertion error.',
                 'Expected ' + JSON.stringify(expected)
                 + ', found ' + JSON.stringify(actual)
                 + ' in ' + callerName);
