@@ -87,20 +87,29 @@
          */
         jQuerySelectors = [
             INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
-        ];
+        ],
 
         /* * * * * * * * * * *
          * Experimental mode *
          * * * * * * * * * * */
 
-        //
+        filteredIdContents = [
+            INJECT.value('ad'),
+            INJECT.value('Ad'),
+            INJECT.value('AD'),
+            INJECT.value('bnr-'),
+            INJECT.value('sponsor'),
+            INJECT.value('annonse'),
+            INJECT.value('sky-left'),
+            INJECT.value('openx-slc')
+        ];
 
     chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         inject.mode = response.storage || 'normal';
 
         switch (inject.mode) {
             case 'experimental':
-                //
+                inject.set.filteredIdContents = filteredIdContents;
             case 'normal':
                 inject.set.windowProperties = windowProperties;
                 inject.set.baitClasses = baitClasses;

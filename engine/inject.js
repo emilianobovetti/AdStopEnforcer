@@ -207,27 +207,24 @@ var INJECT = (function (document) {
 
         document.getElementById = function (id) {
             var realElement = realGetElementById(id),
-                fakeElement;
+                fakeElementDescriptor = {}, key,
+                isBanned = filteredIdContents.reduce(function (acc, item) {
+                    return acc || id.indexOf(item) > -1;
+                }, false);
 
-            // TODO
-            if (id.indexOf('ad') == -1 && id.indexOf('Ad') == -1) {
+            if ( ! isBanned || ! realElement) {
                 return realElement;
             }
 
-            fakeElement = (function () {
-                var fakeElementDescriptor = {},
-                    key;
-
-                for (key in realElement) {
+            for (key in realElement) {
+                if (key === 'offsetParent') {
+                    fakeElementDescriptor[key] = { value: document.body };
+                } else {
                     fakeElementDescriptor[key] = { value: realElement[key] };
                 }
+            }
 
-                return Object.create(Element.prototype, fakeElementDescriptor);
-            })();
-
-            fakeElement.offsetParent = document.body;
-
-            return fakeElement;
+            return Object.create(Element.prototype, fakeElementDescriptor);
         };
     });
 
@@ -245,7 +242,6 @@ var INJECT = (function (document) {
             try {
                 return realGetComputedStyle(element, pseudoElt);
             } catch (e) {
-                console.log('fake getComputedStyle');
                 return { display: 'block' };
             }
         };
@@ -311,7 +307,8 @@ var INJECT = (function (document) {
             baitClasses: [],
             bannedSetTimeoutNames: [],
             bannedSetTimeoutContents:  [],
-            jQuerySelectors: []
+            jQuerySelectors: [],
+            filteredIdContents: []
         };
 
         self.mode = 'normal';
