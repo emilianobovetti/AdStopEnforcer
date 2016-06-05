@@ -49,11 +49,14 @@ var SCRIPT = (function () {
         };
 
         self.render = function () {
-            return '(function () {"use strict";\r\n'
-                + 'var ' + self.assignments.join(',\r\n\t') + ';'
-                + '\r\n\r\n\t' + self.functions.join('\r\n\t')
-                + '\r\n\r\n\t' + self.statements.join('\r\n\t')
-                + '\r\n})();';
+            var newLine = '\r\n',
+                indent = newLine + '\t';
+
+            return '(function () {"use strict";' + newLine
+                + 'var ' + self.assignments.join(',' + indent) + ';' + newLine
+                + indent + self.functions.join(indent)
+                + indent + self.statements.join(indent)
+                + newLine + '})();';
         };
 
         return self;

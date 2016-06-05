@@ -37,6 +37,7 @@ var INJECT = (function (document) {
             get: function () {
                 return property;
             },
+
             set: function (settedValue) {
                 var propertyCopy;
 
@@ -105,8 +106,6 @@ var INJECT = (function (document) {
      * Injected self invoking functions
      * Normal mode
      */
-    script.pushAssignment('windowProperties', '[]');
-
     script.pushSelfInvoking(function injectWindowProperties () {
         windowProperties.forEach(function (property) {
             defineImmutableProperty(window, property.key, property.value);
@@ -114,8 +113,6 @@ var INJECT = (function (document) {
             window[property.key.split('.').shift()] = undefined;
         });
     });
-
-    script.pushAssignment('baitClasses', '[]');
 
     script.pushSelfInvoking(function injectSetAttribute () {
         var realSetAttribute = Element.prototype.setAttribute;
@@ -137,9 +134,6 @@ var INJECT = (function (document) {
             isBanned || realSetAttribute.call(this, name, value);
         };
     });
-
-    script.pushAssignment('bannedSetTimeoutNames', '[]');
-    script.pushAssignment('bannedSetTimeoutContents', '[]');
 
     script.pushSelfInvoking(function injectSetTimeout () {
         var realSetTimeout = window.setTimeout;
@@ -165,8 +159,6 @@ var INJECT = (function (document) {
             } : fn, timeout);
         };
     });
-
-    script.pushAssignment('jQuerySelectors', '[]');
 
     script.pushSelfInvoking(function injectJQuery () {
         var jQuery;
@@ -206,13 +198,10 @@ var INJECT = (function (document) {
      * Injected self invoking functions
      * Experimental mode
      */
-    script.pushAssignment('bannedElementIds', '[]');
-
     script.pushSelfInvoking(function injectGetElementById () {
         var realGetElementById = document.getElementById.bind(document);
 
-        if (bannedElementIds.length == 0) {
-            // nothing to inject
+        if (mode !== 'experimental') {
             return;
         }
 
@@ -220,7 +209,8 @@ var INJECT = (function (document) {
             var realElement = realGetElementById(id),
                 fakeElement;
 
-            if (bannedElementIds.indexOf(id) == -1) {
+            // TODO
+            if (id.indexOf('ad') == -1 && id.indexOf('Ad') == -1) {
                 return realElement;
             }
 
@@ -244,8 +234,8 @@ var INJECT = (function (document) {
     script.pushSelfInvoking(function injectGetComputedStyle () {
         var realGetComputedStyle = window.getComputedStyle;
 
-        if (bannedElementIds.length == 0) {
-            // no fake element is returned from
+        if (mode !== 'experimental') {
+            // if no fake element is returned from
             // document.getElementById, so there
             // is no need to inject window.getComputedStyle
             return;
@@ -264,8 +254,7 @@ var INJECT = (function (document) {
     script.pushSelfInvoking(function injectAppendChild () {
         var realAppendChild = Node.prototype.appendChild;
 
-        if (bannedElementIds.length == 0) {
-            // see injectGetComputedStyle
+        if (mode !== 'experimental') {
             return;
         }
 
@@ -281,8 +270,7 @@ var INJECT = (function (document) {
     script.pushSelfInvoking(function injectRemoveChild () {
         var realRemoveChild = Node.prototype.removeChild;
 
-        if (bannedElementIds.length == 0) {
-            // see injectGetComputedStyle
+        if (mode !== 'experimental') {
             return;
         }
 
@@ -318,31 +306,23 @@ var INJECT = (function (document) {
 
         self.script = script;
 
-        self.setWindowProperties = function (properties) {
-            self.script.pushAssignment('windowProperties', injectArrayToString(properties));
+        self.set = {
+            windowProperties: [],
+            baitClasses: [],
+            bannedSetTimeoutNames: [],
+            bannedSetTimeoutContents:  [],
+            jQuerySelectors: []
         };
 
-        self.setBaitClasses = function (classes) {
-            self.script.pushAssignment('baitClasses', injectArrayToString(classes));
-        };
-
-        self.setBannedSetTimeoutNames = function (names) {
-            self.script.pushAssignment('bannedSetTimeoutNames', injectArrayToString(names));
-        };
-
-        self.setBannedSetTimeoutContents = function (contents) {
-            self.script.pushAssignment('bannedSetTimeoutContents', injectArrayToString(contents));
-        };
-
-        self.setJQuerySelectors = function (selectors) {
-            self.script.pushAssignment('jQuerySelectors', injectArrayToString(selectors));
-        };
-
-        self.setBannedElementIds = function (ids) {
-            self.script.pushAssignment('bannedElementIds', injectArrayToString(ids));
-        };
+        self.mode = 'normal';
 
         self.run = function () {
+            self.script.pushAssignment('mode', '"' + self.mode + '"');
+
+            Object.keys(self.set).forEach(function (name) {
+                self.script.pushAssignment(name, injectArrayToString(self.set[name]));
+            });
+
             setTimeout(function () {
                 var scriptElement = document.createElement('script');
 

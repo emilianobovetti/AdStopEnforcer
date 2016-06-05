@@ -24,13 +24,22 @@
 
     var inject = INJECT.create();
 
-    console.log('\t////////////////////////////////\r\n',
-                '\t// FuckFuckAdBlock test suite //\r\n',
-                '\t////////////////////////////////\r\n');
-
     inject.debug = false;
 
-    inject.setWindowProperties([
+    inject.script.pushFunction(function printTestSuiteMsg () {
+        console.log('\t////////////////////////////////\r\n',
+                    '\t// FuckFuckAdBlock test suite //\r\n',
+                    '\t////////////////////////////////\r\n');
+    });
+
+    inject.script.pushSelfInvoking(function () {
+        printTestSuiteMsg();
+    });
+
+    inject.script.pushAssignment('successfulAssertionCounter', 0);
+    inject.script.pushAssignment('errorAssertionCounter', 0);
+
+    inject.set.windowProperties = [
         INJECT.pair('testNull', null),
         INJECT.pair('testUndefined', undefined),
         INJECT.pair('testTrue', true),
@@ -40,24 +49,24 @@
         INJECT.pair('testEmptyFunction', function () {}),
         INJECT.pair('testEmptyObject', {}),
         INJECT.pair('test.nested.property', null)
-    ]);
+    ];
 
-    inject.setBaitClasses([
+    inject.set.baitClasses = [
         INJECT.value('testBaitClass1'),
         INJECT.value('testBaitClass2')
-    ]);
+    ];
 
-    inject.setBannedSetTimeoutNames([
+    inject.set.bannedSetTimeoutNames = [
         INJECT.value('setTimeoutBannedName')
-    ]);
+    ];
 
-    inject.setBannedSetTimeoutContents([
+    inject.set.bannedSetTimeoutContents = [
         INJECT.value('setTimeoutBannedContent')
-    ]);
+    ];
 
-    inject.setJQuerySelectors([
+    inject.set.jQuerySelectors = [
         INJECT.pair('#testIdSelector', { length: 1 })
-    ]);
+    ];
 
     /*
      * Functions
@@ -65,21 +74,24 @@
     inject.script.pushFunction(function assertEquals (expected, actual) {
         var callerName;
 
-        if (expected === actual) {
-            return;
-        }
-
         try {
             throw new Error();
         } catch (e) {
             callerName = e.stack.split('at')[2].trim();
         }
 
-        throw new Error('Expected '
-            + JSON.stringify(expected)
-            + ', found '
-            + JSON.stringify(actual)
-            + ' in ' + callerName);
+        if (expected === actual) {
+            console.log('Successful assertion in ' + callerName);
+
+            successfulAssertionCounter++;
+        } else {
+            console.log('Assertion error.',
+                'Expected ' + JSON.stringify(expected)
+                + ', found ' + JSON.stringify(actual)
+                + ' in ' + callerName);
+
+            errorAssertionCounter++;
+        }
     });
 
     /*
@@ -212,14 +224,25 @@
     /*
      * Test jQuery injection
      */
-    inject.script.pushSelfInvoking(function testJQuerySelectors () {
-        window.onload = function () {
+    inject.script.pushSelfInvoking(function () {
+        window.addEventListener('load', function testJQuerySelectors () {
             if (typeof $ !== undefined) {
                 assertEquals(1, $('#testIdSelector').length);
             } else {
                 console.log('jQuery not loaded');
             }
-        }
+        });
+    });
+
+    inject.script.pushSelfInvoking(function () {
+        window.addEventListener('load', function assertionsCount () {
+            console.log('Successful assertions: ', successfulAssertionCounter);
+            console.log('Assertions errors: ', errorAssertionCounter);
+        });
+    });
+
+    inject.script.pushSelfInvoking(function () {
+        window.addEventListener('load', printTestSuiteMsg);
     });
 
     inject.run();

@@ -87,44 +87,26 @@
          */
         jQuerySelectors = [
             INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
-        ],
+        ];
 
         /* * * * * * * * * * *
          * Experimental mode *
          * * * * * * * * * * */
 
-        /*
-         * If one of these ids are passed to document.getElementById,
-         * a fake element object is returned.
-         */
-        bannedElementIds = [
-            INJECT.value('adSpace'),
-            INJECT.value('adTop'),
-            INJECT.value('ad_leader'),
-            INJECT.value('adskintop'),
-            INJECT.value('colRightAd'),
-            INJECT.value('square_ad'),
-            INJECT.value('walltopad'),
-            INJECT.value('ad'),
-            INJECT.value('ads'),
-            INJECT.value('adsense')
-        ];
+        //
 
     chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
-        // TODO
-        console.log((response.storage || 'normal') + ' mode');
+        inject.mode = response.storage || 'normal';
 
-        inject.debug = true;
-
-        switch (response.storage || 'normal') {
+        switch (inject.mode) {
             case 'experimental':
-                inject.setBannedElementIds(bannedElementIds);
+                //
             case 'normal':
-                inject.setWindowProperties(windowProperties);
-                inject.setBaitClasses(baitClasses);
-                inject.setBannedSetTimeoutNames(bannedSetTimeoutNames);
-                inject.setBannedSetTimeoutContents(bannedSetTimeoutContents);
-                inject.setJQuerySelectors(jQuerySelectors);
+                inject.set.windowProperties = windowProperties;
+                inject.set.baitClasses = baitClasses;
+                inject.set.bannedSetTimeoutNames = bannedSetTimeoutNames;
+                inject.set.bannedSetTimeoutContents = bannedSetTimeoutContents;
+                inject.set.jQuerySelectors = jQuerySelectors;
 
                 inject.run();
             case 'off':
