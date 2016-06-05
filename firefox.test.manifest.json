@@ -29,7 +29,6 @@
             "js": [
                 "engine/script.js",
                 "engine/inject.js",
-                "engine/main.js",
                 "engine/test.js"
             ]
         }
@@ -37,7 +36,7 @@
 
     "background": {
         "scripts": [
-            "engine/message_listener.js"
+            "background/message_listener.js"
         ]
     },
 

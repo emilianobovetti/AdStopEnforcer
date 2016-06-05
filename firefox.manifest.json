@@ -36,7 +36,7 @@
 
     "background": {
         "scripts": [
-            "engine/message_listener.js"
+            "background/message_listener.js"
         ]
     },
 

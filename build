@@ -30,8 +30,8 @@ rm -rf "$BUILD_DIR"
 test -d "$CHROME_BUILD_DIR" || mkdir -p "$CHROME_BUILD_DIR"
 test -d "$FIREFOX_BUILD_DIR" || mkdir -p "$FIREFOX_BUILD_DIR"
 
-cp -r icons engine popup "chrome.$MANIFEST" "$CHROME_BUILD_DIR"
-cp -r icons engine popup "firefox.$MANIFEST" "$FIREFOX_BUILD_DIR"
+cp -r icons engine background popup "chrome.$MANIFEST" "$CHROME_BUILD_DIR"
+cp -r icons engine background popup "firefox.$MANIFEST" "$FIREFOX_BUILD_DIR"
 
 mv "$CHROME_BUILD_DIR/chrome.$MANIFEST" "$CHROME_BUILD_DIR/manifest.json"
 mv "$FIREFOX_BUILD_DIR/firefox.$MANIFEST" "$FIREFOX_BUILD_DIR/manifest.json"

@@ -22,9 +22,14 @@
 var INJECT = (function (document) {
     'use strict';
 
-    var _INJECT = INJECT || {};
+    var _INJECT = INJECT || {},
 
-    function defineImmutableProperty (object, key, value) {
+        script = SCRIPT.create();
+
+    /*
+     * Injected functions
+     */
+    script.pushFunction(function defineImmutableProperty (object, key, value) {
         var keyList = typeof key == 'string' ? key.split('.') : key,
             property;
 
@@ -50,9 +55,9 @@ var INJECT = (function (document) {
                 property = settedValue;
             }
         });
-    }
+    });
 
-    function deepMerge (target, source) {
+    script.pushFunction(function deepMerge (target, source) {
         Object.keys(source).forEach(function (key) {
             if (target[key] && typeof target[key] == 'object' && source[key] && typeof source[key] == 'object') {
                 target[key] = deepMerge(target[key], source[key]);
@@ -62,9 +67,9 @@ var INJECT = (function (document) {
         });
 
         return target;
-    }
+    });
 
-    function fakeFabConstructor () {
+    script.pushFunction(function fakeFabConstructor () {
         var self = {
             setOption: function (options, value) {},
 
@@ -92,18 +97,33 @@ var INJECT = (function (document) {
         };
 
         return self;
-    }
+    });
 
-    function injectWindowProperties () {
+    script.pushAssignment('fakeFab', 'fakeFabConstructor()');
+
+    /*
+     * Injected self invoking functions
+     * Normal mode
+     */
+    script.pushAssignment('windowProperties', '[]');
+
+    script.pushSelfInvoking(function injectWindowProperties () {
         windowProperties.forEach(function (property) {
             defineImmutableProperty(window, property.key, property.value);
 
             window[property.key.split('.').shift()] = undefined;
         });
-    }
+    });
 
-    function injectSetAttribute () {
+    script.pushAssignment('baitClasses', '[]');
+
+    script.pushSelfInvoking(function injectSetAttribute () {
         var realSetAttribute = Element.prototype.setAttribute;
+
+        if (baitClasses.length == 0) {
+            // nothing to ban
+            return;
+        }
 
         Element.prototype.setAttribute = function (name, value) {
             var isBanned = false;
@@ -116,32 +136,45 @@ var INJECT = (function (document) {
 
             isBanned || realSetAttribute.call(this, name, value);
         };
-    }
+    });
 
-    function injectSetTimeout () {
+    script.pushAssignment('bannedSetTimeoutNames', '[]');
+    script.pushAssignment('bannedSetTimeoutContents', '[]');
+
+    script.pushSelfInvoking(function injectSetTimeout () {
         var realSetTimeout = window.setTimeout;
 
-        if (bannedSetTimeoutNames.length + bannedSetTimeoutContents.length > 0) {
-            window.setTimeout = function (fn, timeout) {
-                var isBanned = false;
-
-                bannedSetTimeoutNames.forEach(function (bannedName) {
-                    isBanned = isBanned || fn.name === bannedName;
-                });
-
-                bannedSetTimeoutContents.forEach(function (bannedContent) {
-                    isBanned = isBanned || fn.toString().indexOf(bannedContent) > -1;
-                });
-
-                isBanned || realSetTimeout(fn instanceof Function ? function() {
-                        fn.apply(null, Array.prototype.slice.call(arguments, 2));
-                    } : fn, timeout);
-            };
+        if (bannedSetTimeoutNames.length + bannedSetTimeoutContents.length == 0) {
+            // nothing to ban
+            return;
         }
-    }
 
-    function injectJQuery () {
+        window.setTimeout = function (fn, timeout) {
+            var isBanned = false;
+
+            bannedSetTimeoutNames.forEach(function (bannedName) {
+                isBanned = isBanned || fn.name === bannedName;
+            });
+
+            bannedSetTimeoutContents.forEach(function (bannedContent) {
+                isBanned = isBanned || fn.toString().indexOf(bannedContent) > -1;
+            });
+
+            isBanned || realSetTimeout(fn instanceof Function ? function () {
+                fn.apply(null, Array.prototype.slice.call(arguments, 2));
+            } : fn, timeout);
+        };
+    });
+
+    script.pushAssignment('jQuerySelectors', '[]');
+
+    script.pushSelfInvoking(function injectJQuery () {
         var jQuery;
+
+        if (jQuerySelectors.length == 0) {
+            // nothing to ban
+            return;
+        }
 
         function jQueryGetter() {
             return jQuery;
@@ -165,12 +198,110 @@ var INJECT = (function (document) {
             });
         }
 
-        if (jQuerySelectors.length > 0) {
-            Object.defineProperty(window, 'jQuery', { get: jQueryGetter, set: jQuerySetter });
-            Object.defineProperty(window, '$', { get: jQueryGetter, set: jQuerySetter });
-        }
-    }
+        Object.defineProperty(window, 'jQuery', { get: jQueryGetter, set: jQuerySetter });
+        Object.defineProperty(window, '$', { get: jQueryGetter, set: jQuerySetter });
+    });
 
+    /*
+     * Injected self invoking functions
+     * Experimental mode
+     */
+    script.pushAssignment('bannedElementIds', '[]');
+
+    script.pushSelfInvoking(function injectGetElementById () {
+        var realGetElementById = document.getElementById.bind(document);
+
+        if (bannedElementIds.length == 0) {
+            // nothing to inject
+            return;
+        }
+
+        document.getElementById = function (id) {
+            var realElement = realGetElementById(id),
+                fakeElement;
+
+            if (bannedElementIds.indexOf(id) == -1) {
+                return realElement;
+            }
+
+            fakeElement = (function () {
+                var fakeElementDescriptor = {},
+                    key;
+
+                for (key in realElement) {
+                    fakeElementDescriptor[key] = { value: realElement[key] };
+                }
+
+                return Object.create(Element.prototype, fakeElementDescriptor);
+            })();
+
+            fakeElement.offsetParent = document.body;
+
+            return fakeElement;
+        };
+    });
+
+    script.pushSelfInvoking(function injectGetComputedStyle () {
+        var realGetComputedStyle = window.getComputedStyle;
+
+        if (bannedElementIds.length == 0) {
+            // no fake element is returned from
+            // document.getElementById, so there
+            // is no need to inject window.getComputedStyle
+            return;
+        }
+
+        window.getComputedStyle = function (element, pseudoElt) {
+            try {
+                return realGetComputedStyle(element, pseudoElt);
+            } catch (e) {
+                console.log('fake getComputedStyle');
+                return { display: 'block' };
+            }
+        };
+    });
+
+    script.pushSelfInvoking(function injectAppendChild () {
+        var realAppendChild = Node.prototype.appendChild;
+
+        if (bannedElementIds.length == 0) {
+            // see injectGetComputedStyle
+            return;
+        }
+
+        Node.prototype.appendChild = function (child) {
+            try {
+                return realAppendChild.call(this, child);
+            } catch (e) {
+                return child;
+            }
+        };
+    });
+
+    script.pushSelfInvoking(function injectRemoveChild () {
+        var realRemoveChild = Node.prototype.removeChild;
+
+        if (bannedElementIds.length == 0) {
+            // see injectGetComputedStyle
+            return;
+        }
+
+        Node.prototype.removeChild = function (child) {
+            try {
+                return realRemoveChild.call(this, child);
+            } catch (e) {
+                return child;
+            }
+        };
+    });
+
+    /*
+     * injectArrayToString takes an array of objects,
+     * filters the array with domainCheck property
+     * and returns a string representing the source of array.
+     * For each object in array the toString method is called
+     * to convert the object to string
+     */
     function injectArrayToString (array) {
         array = array.filter(function (x) { return x && x.domainCheck; });
 
@@ -179,10 +310,13 @@ var INJECT = (function (document) {
             }, '') + ']';
     }
 
+    /*
+     * Create new INJECT instance
+     */
     _INJECT.create = function () {
         var self = {};
 
-        self.script = SCRIPT.create();
+        self.script = script;
 
         self.setWindowProperties = function (properties) {
             self.script.pushAssignment('windowProperties', injectArrayToString(properties));
@@ -204,6 +338,10 @@ var INJECT = (function (document) {
             self.script.pushAssignment('jQuerySelectors', injectArrayToString(selectors));
         };
 
+        self.setBannedElementIds = function (ids) {
+            self.script.pushAssignment('bannedElementIds', injectArrayToString(ids));
+        };
+
         self.run = function () {
             setTimeout(function () {
                 var scriptElement = document.createElement('script');
@@ -221,22 +359,6 @@ var INJECT = (function (document) {
             return self;
         };
 
-        self.script.pushAssignment('fakeFab', 'fakeFabConstructor()');
-
-        self.script.pushFunction(fakeFabConstructor);
-
-        self.script.pushFunction(defineImmutableProperty);
-
-        self.script.pushFunction(deepMerge);
-
-        self.script.pushSelfInvoking(injectWindowProperties);
-
-        self.script.pushSelfInvoking(injectSetAttribute);
-
-        self.script.pushSelfInvoking(injectSetTimeout);
-
-        self.script.pushSelfInvoking(injectJQuery);
-
         return self;
     };
 
@@ -251,7 +373,7 @@ var INJECT = (function (document) {
     _INJECT.fakeFabConstructor = _INJECT.raw('fakeFabConstructor');
 
     /*
-     * inject object initializer
+     * Converts value to string
      */
     function valueToString (value) {
         if (value === null) {
@@ -267,6 +389,9 @@ var INJECT = (function (document) {
         }
     }
 
+    /*
+     * Create new INJECT.value
+     */
     _INJECT.value = function (value, domains) {
         var self = {};
 
@@ -293,6 +418,9 @@ var INJECT = (function (document) {
         return self;
     };
 
+    /*
+     * Create new INJECT.pair
+     */
     _INJECT.pair = function (key, value, domains) {
         var self = _INJECT.value(value, domains);
 

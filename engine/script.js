@@ -31,7 +31,7 @@ var SCRIPT = (function () {
         };
 
         self.pushAssignment = function (name, expression) {
-            self.assignments.push('var ' + name + ' = ' + expression + ';\r\n');
+            self.assignments.push(name + ' = ' + expression);
 
             return self;
         };
@@ -50,9 +50,10 @@ var SCRIPT = (function () {
 
         self.render = function () {
             return '(function () {"use strict";\r\n'
-                + self.assignments.join('')
-                + self.functions.join('')
-                + self.statements.join('') + '\r\n})();';
+                + 'var ' + self.assignments.join(',\r\n\t') + ';'
+                + '\r\n\r\n\t' + self.functions.join('\r\n\t')
+                + '\r\n\r\n\t' + self.statements.join('\r\n\t')
+                + '\r\n})();';
         };
 
         return self;

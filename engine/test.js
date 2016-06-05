@@ -30,7 +30,7 @@
 
     inject.debug = false;
 
-    inject.windowProperties([
+    inject.setWindowProperties([
         INJECT.pair('testNull', null),
         INJECT.pair('testUndefined', undefined),
         INJECT.pair('testTrue', true),
@@ -42,20 +42,20 @@
         INJECT.pair('test.nested.property', null)
     ]);
 
-    inject.baitClasses([
+    inject.setBaitClasses([
         INJECT.value('testBaitClass1'),
         INJECT.value('testBaitClass2')
     ]);
 
-    inject.bannedSetTimeoutNames([
+    inject.setBannedSetTimeoutNames([
         INJECT.value('setTimeoutBannedName')
     ]);
 
-    inject.bannedSetTimeoutContents([
+    inject.setBannedSetTimeoutContents([
         INJECT.value('setTimeoutBannedContent')
     ]);
 
-    inject.jQuerySelectors([
+    inject.setJQuerySelectors([
         INJECT.pair('#testIdSelector', { length: 1 })
     ]);
 

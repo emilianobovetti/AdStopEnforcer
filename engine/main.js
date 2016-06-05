@@ -24,9 +24,12 @@
 
     var inject = INJECT.create(),
 
+        /* * * * * * * *
+         * Normal mode *
+         * * * * * * * */
+
         /*
-         * Array of INJECT.pair() objects which contain variabile names
-         * and values to be injected.
+         * Variabile names and values to be injected.
          * They can't be overridden.
          */
         windowProperties = [
@@ -47,7 +50,9 @@
         ],
 
         /*
-         * Array of INJECT.value() objects which contain bait classes.
+         * Bait classes.
+         * If one of these classes are passed to Element.prototype.setAttribute,
+         * the element class is not setted.
          */
         baitClasses = [
             INJECT.value('pub_300x250'),
@@ -62,8 +67,7 @@
         ],
 
         /*
-         * Array of INJECT.value() objects which contain function names
-         * that can't be called through setTimeout().
+         * Function names that can't be called through setTimeout().
          */
         bannedSetTimeoutNames = [
             INJECT.value('adsBlock', 'el-nation.com')
@@ -79,19 +83,42 @@
         ],
 
         /*
-         * Array of INJECT.pair() objects with filtered jQuery selector
-         * and an object of injected properties.
+         * Filtered jQuery selector and an object of injected properties.
          */
         jQuerySelectors = [
             INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
+        ],
+
+        /* * * * * * * * * * *
+         * Experimental mode *
+         * * * * * * * * * * */
+
+        /*
+         * If one of these ids are passed to document.getElementById,
+         * a fake element object is returned.
+         */
+        bannedElementIds = [
+            INJECT.value('adSpace'),
+            INJECT.value('adTop'),
+            INJECT.value('ad_leader'),
+            INJECT.value('adskintop'),
+            INJECT.value('colRightAd'),
+            INJECT.value('square_ad'),
+            INJECT.value('walltopad'),
+            INJECT.value('ad'),
+            INJECT.value('ads'),
+            INJECT.value('adsense')
         ];
 
-    chrome.runtime.sendMessage({ storage: 'mode' }, function (result) {
+    chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         // TODO
-        console.log((result.storage || 'normal') + ' mode');
+        console.log((response.storage || 'normal') + ' mode');
 
-        switch (result.storage || 'normal') {
+        inject.debug = true;
+
+        switch (response.storage || 'normal') {
             case 'experimental':
+                inject.setBannedElementIds(bannedElementIds);
             case 'normal':
                 inject.setWindowProperties(windowProperties);
                 inject.setBaitClasses(baitClasses);
