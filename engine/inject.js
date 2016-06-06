@@ -70,6 +70,14 @@ var INJECT = (function (document) {
         return target;
     });
 
+    script.pushFunction(function nativeCode (fn, name) {
+        fn.toString = function () {
+            return 'function ' + (name || fn.name) + '() { [native code] }';
+        };
+
+        return fn;
+    });
+
     script.pushFunction(function fakeFabConstructor () {
         var self = {
             setOption: function (options, value) {},
@@ -104,7 +112,6 @@ var INJECT = (function (document) {
 
     /*
      * Injected self invoking functions
-     * Normal mode
      */
     script.pushSelfInvoking(function injectWindowProperties () {
         windowProperties.forEach(function (property) {
@@ -112,27 +119,6 @@ var INJECT = (function (document) {
 
             window[property.key.split('.').shift()] = undefined;
         });
-    });
-
-    script.pushSelfInvoking(function injectSetAttribute () {
-        var realSetAttribute = Element.prototype.setAttribute;
-
-        if (baitClasses.length == 0) {
-            // nothing to ban
-            return;
-        }
-
-        Element.prototype.setAttribute = function (name, value) {
-            var isBanned = false;
-
-            if (name === 'class') {
-                isBanned = value.split(' ').reduce(function (acc, item) {
-                    return acc || baitClasses.indexOf(item) > -1;
-                }, false);
-            }
-
-            isBanned || realSetAttribute.call(this, name, value);
-        };
     });
 
     script.pushSelfInvoking(function injectSetTimeout () {
@@ -158,6 +144,8 @@ var INJECT = (function (document) {
                 fn.apply(null, Array.prototype.slice.call(arguments, 2));
             } : fn, timeout);
         };
+
+        nativeCode(window.setTimeout, 'setTimeout');
     });
 
     script.pushSelfInvoking(function injectJQuery () {
@@ -194,10 +182,47 @@ var INJECT = (function (document) {
         Object.defineProperty(window, '$', { get: jQueryGetter, set: jQuerySetter });
     });
 
-    /*
-     * Injected self invoking functions
-     * Experimental mode
-     */
+    script.pushFunction(function isBannedId (id) {
+        var isBanned = false;
+
+        isBanned = filteredIdContents.reduce(function (acc, banned) {
+            return acc || id.indexOf(banned) > -1;
+        }, isBanned);
+
+        isBanned = allowedIdContents.reduce(function (acc, allowed) {
+            return acc && id.indexOf(allowed) == -1;
+        }, isBanned);
+
+        return isBanned;
+    });
+
+    script.pushSelfInvoking(function injectSetAttribute () {
+        var realSetAttribute = Element.prototype.setAttribute;
+
+        if (baitClasses.length == 0 && mode !== 'experimental') {
+            // nothing to ban
+            return;
+        }
+
+        Element.prototype.setAttribute = function (name, value) {
+            var isBanned = false;
+
+            if (name === 'id' && mode === 'experimental') {
+                isBanned = isBannedId(value);
+            }
+
+            if (name === 'class') {
+                isBanned = value.split(' ').reduce(function (acc, item) {
+                    return acc || baitClasses.indexOf(item) > -1;
+                }, false);
+            }
+
+            isBanned || realSetAttribute.call(this, name, value);
+        };
+
+        nativeCode(Element.prototype.setAttribute, 'setAttribute');
+    });
+
     script.pushSelfInvoking(function injectGetElementById () {
         var realGetElementById = document.getElementById.bind(document);
 
@@ -207,25 +232,24 @@ var INJECT = (function (document) {
 
         document.getElementById = function (id) {
             var realElement = realGetElementById(id),
-                fakeElementDescriptor = {}, key,
-                isBanned = filteredIdContents.reduce(function (acc, item) {
-                    return acc || id.indexOf(item) > -1;
-                }, false);
+                fakeElementDescriptor = {}, key;
 
-            if ( ! isBanned || ! realElement) {
+            if ( ! isBannedId(id) || ! realElement) {
                 return realElement;
             }
 
+            console.log('banned getElementById ', id);
+
             for (key in realElement) {
-                if (key === 'offsetParent') {
-                    fakeElementDescriptor[key] = { value: document.body };
-                } else {
-                    fakeElementDescriptor[key] = { value: realElement[key] };
-                }
+                fakeElementDescriptor[key] = { value: realElement[key] };
             }
+
+            fakeElementDescriptor.offsetParent = { value: document.body };
 
             return Object.create(Element.prototype, fakeElementDescriptor);
         };
+
+        nativeCode(document.getElementById, 'getElementById');
     });
 
     script.pushSelfInvoking(function injectCreateElement () {
@@ -236,25 +260,25 @@ var INJECT = (function (document) {
         }
 
         document.createElement = function (tagName) {
-            var realElement = realCreateElement(tagName),
+            var element = realCreateElement(tagName),
                 elementId;
 
-            Object.defineProperty(realElement, 'id', {
+            Object.defineProperty(element, 'id', {
                 get: function () {
                     return elementId;
                 },
 
-                set: function (newId) {
-                    elementId = newId;
+                set: function (id) {
+                    elementId = id;
 
-                    filteredIdContents.reduce(function (acc, item) {
-                        return acc || newId.indexOf(item) > -1;
-                    }, false) || realElement.setAttribute('id', newId)
+                    element.setAttribute('id', id);
                 }
             });
 
-            return realElement;
+            return element;
         };
+
+        nativeCode(document.createElement, 'createElement');
     });
 
     script.pushSelfInvoking(function injectGetComputedStyle () {
@@ -274,6 +298,8 @@ var INJECT = (function (document) {
                 return { display: 'block' };
             }
         };
+
+        nativeCode(window.getComputedStyle, 'getComputedStyle');
     });
 
     script.pushSelfInvoking(function injectAppendChild () {
@@ -290,6 +316,8 @@ var INJECT = (function (document) {
                 return child;
             }
         };
+
+        nativeCode(Node.prototype.appendChild, 'appendChild');
     });
 
     script.pushSelfInvoking(function injectRemoveChild () {
@@ -306,6 +334,8 @@ var INJECT = (function (document) {
                 return child;
             }
         };
+
+        nativeCode(Node.prototype.removeChild, 'removeChild');
     });
 
     /*
@@ -337,12 +367,19 @@ var INJECT = (function (document) {
             bannedSetTimeoutNames: [],
             bannedSetTimeoutContents:  [],
             jQuerySelectors: [],
-            filteredIdContents: []
+            filteredIdContents: [],
+            allowedIdContents: []
         };
 
         self.mode = 'normal';
 
+        self.debug = false;
+
         self.run = function () {
+            if (self.mode === 'off') {
+                return self;
+            }
+
             self.script.pushAssignment('mode', '"' + self.mode + '"');
 
             Object.keys(self.set).forEach(function (name) {
