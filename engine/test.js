@@ -77,7 +77,7 @@
         try {
             throw new Error();
         } catch (e) {
-            callerName = e.stack.split('at')[2].trim();
+            callerName = e.stack.split(' at ')[2].trim();
         }
 
         if (expected === actual) {
@@ -194,9 +194,15 @@
      * Test setTimeout injection
      */
     inject.script.pushSelfInvoking(function testSetTimeoutBannedName () {
+        var called = false;
+
         setTimeout(function setTimeoutBannedName() {
-            throw new Error('Able to call banned setTimeout name');
+            called = true;
         }, 1);
+
+        setTimeout(function () {
+            assertEquals(false, called);
+        }, 2);
     });
 
     inject.script.pushSelfInvoking(function testSetTimeoutAllowedName () {
@@ -207,18 +213,22 @@
         }, 1);
 
         setTimeout(function () {
-            if ( ! called) {
-                throw new Error('Unable to call allowed setTimeout name');
-            }
+            assertEquals(true, called);
         }, 2);
     });
 
     inject.script.pushSelfInvoking(function testSetTimeoutBannedContent () {
+        var called = false;
+
         setTimeout(function () {
             var setTimeoutBannedContent;
 
-            throw new Error('Able to call function with setTimeout banned content');
+            called = true;
         }, 1);
+
+        setTimeout(function () {
+            assertEquals(false, called);
+        }, 2);
     });
 
     /*

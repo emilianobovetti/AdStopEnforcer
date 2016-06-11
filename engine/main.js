@@ -30,7 +30,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
      */
     if (inject.mode === 'experimental') {
 
-        inject.set.filteredIdContents = [
+        inject.set.idBlacklist = [
             INJECT.value('ad'),
             INJECT.value('Ad'),
             INJECT.value('AD'),
@@ -45,13 +45,36 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
             INJECT.value('glinkswrapper')
         ];
 
-        inject.set.allowedIdContents = [
+        inject.set.idWhitelist = [
             INJECT.value('add'),
             INJECT.value('admin'),
             INJECT.value('Admin'),
             INJECT.value('ADMIN'),
             INJECT.value('load'),
-            INJECT.value('pagelet_advertiser_panel') // to make facebook work
+            // facebook whitelist
+            INJECT.value('pagelet_advertiser_panel'),
+            INJECT.value('pagelet_above_header_timeline')
+        ];
+
+        inject.set.domainBlacklist = [
+            INJECT.value('agoda.net'),
+            INJECT.value('ad.mail.ru'),
+            INJECT.value('adn.ebay.com'),
+            INJECT.value('juicyads.com'),
+            INJECT.value('as.inbox.com'),
+            INJECT.value('ads.yahoo.com'),
+            INJECT.value('ads.zynga.com'),
+            INJECT.value('ads.twitter.com'),
+            INJECT.value('promote.pair.com'),
+            INJECT.value('ad.foxnetworks.com'),
+            INJECT.value('a.livesportmedia.eu'),
+            INJECT.value('advertising.aol.com'),
+            INJECT.value('cas.clickability.com'),
+            INJECT.value('advertising.yahoo.com'),
+            INJECT.value('adsatt.espn.starwave.com'),
+            INJECT.value('partnerads.ysm.yahoo.com'),
+            INJECT.value('adsatt.abcnews.starwave.com'),
+            INJECT.value('www.doubleclickbygoogle.com')
         ];
     }
 

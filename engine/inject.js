@@ -70,40 +70,30 @@ var INJECT = (function (document) {
         return target;
     });
 
-    script.pushFunction(function nativeCode (fn, name) {
+    script.pushFunction(function nativeCode (fn) {
         fn.toString = function () {
-            return 'function ' + (name || fn.name) + '() { [native code] }';
+            return 'function ' + fn.name + '() { [native code] }';
         };
 
         return fn;
     });
 
     script.pushFunction(function fakeFabConstructor () {
-        var self = {
-            setOption: function (options, value) {},
+        var self = {};
 
-            check: function (loop) { return true; },
+        self.setOption = function (options, value) {};
 
-            emitEvent: function (detected) { return self; },
+        self.check = function (loop) { return true; };
 
-            clearEvent: function () {},
+        self.emitEvent = function (detected) { return self; };
 
-            on: function (detected, fn) {
-                if ( ! detected) {
-                   fn();
-                }
+        self.clearEvent = function () {};
 
-                return self;
-            },
+        self.on = function (detected, fn) { detected || fn(); return self; };
 
-            onDetected: function (fn) {
-                return self.on(true, fn);
-            },
+        self.onDetected = function (fn) { return self.on(true, fn); };
 
-            onNotDetected: function (fn) {
-                return self.on(false, fn);
-            }
-        };
+        self.onNotDetected = function (fn) { return self.on(false, fn); };
 
         return self;
     });
@@ -129,7 +119,7 @@ var INJECT = (function (document) {
             return;
         }
 
-        window.setTimeout = function (fn, timeout) {
+        window.setTimeout = function setTimeout (fn, timeout) {
             var isBanned = false;
 
             bannedSetTimeoutNames.forEach(function (bannedName) {
@@ -145,7 +135,7 @@ var INJECT = (function (document) {
             } : fn, timeout);
         };
 
-        nativeCode(window.setTimeout, 'setTimeout');
+        nativeCode(window.setTimeout);
     });
 
     script.pushSelfInvoking(function injectJQuery () {
@@ -182,18 +172,36 @@ var INJECT = (function (document) {
         Object.defineProperty(window, '$', { get: jQueryGetter, set: jQuerySetter });
     });
 
-    script.pushFunction(function isBannedId (id) {
+    script.pushFunction(function isBlacklistedId (id) {
         var isBanned = false;
 
-        isBanned = filteredIdContents.reduce(function (acc, banned) {
+        isBanned = idBlacklist.reduce(function (acc, banned) {
             return acc || id.indexOf(banned) > -1;
         }, isBanned);
 
-        isBanned = allowedIdContents.reduce(function (acc, allowed) {
+        isBanned = idWhitelist.reduce(function (acc, allowed) {
             return acc && id.indexOf(allowed) == -1;
         }, isBanned);
 
         return isBanned;
+    });
+
+    script.pushFunction(function urlToDomain (url) {
+        if (url.startsWith('//')) {
+            url = url.substring(2);
+        } else if (url.indexOf('://') > -1) {
+            url = url.split('://')[1];
+        }
+
+        return url.split('/')[0].split(':')[0];
+    });
+
+    script.pushFunction(function isBlacklistedSrc (src) {
+        var domain = urlToDomain(src);
+
+        return domainBlacklist.reduce(function (acc, banned) {
+            return acc || domain === banned;
+        }, false);
     });
 
     script.pushSelfInvoking(function injectSetAttribute () {
@@ -204,14 +212,14 @@ var INJECT = (function (document) {
             return;
         }
 
-        Element.prototype.setAttribute = function (name, value) {
+        Element.prototype.setAttribute = function setAttribute (name, value) {
             var isBanned = false;
 
             if (name === 'id' && mode === 'experimental') {
-                isBanned = isBannedId(value);
-            }
-
-            if (name === 'class') {
+                isBanned = isBlacklistedId(value);
+            } else if (name === 'src' && mode === 'experimental') {
+                isBanned = isBlacklistedSrc(value);
+            } else if (name === 'class') {
                 isBanned = value.split(' ').reduce(function (acc, item) {
                     return acc || baitClasses.indexOf(item) > -1;
                 }, false);
@@ -220,7 +228,7 @@ var INJECT = (function (document) {
             isBanned || realSetAttribute.call(this, name, value);
         };
 
-        nativeCode(Element.prototype.setAttribute, 'setAttribute');
+        nativeCode(Element.prototype.setAttribute);
     });
 
     script.pushSelfInvoking(function injectGetElementById () {
@@ -230,15 +238,13 @@ var INJECT = (function (document) {
             return;
         }
 
-        document.getElementById = function (id) {
+        document.getElementById = function getElementById (id) {
             var realElement = realGetElementById(id),
                 fakeElementDescriptor = {}, key;
 
-            if ( ! isBannedId(id) || ! realElement) {
+            if ( ! isBlacklistedId(id) || ! realElement) {
                 return realElement;
             }
-
-            console.log('banned getElementById ', id);
 
             for (key in realElement) {
                 fakeElementDescriptor[key] = { value: realElement[key] };
@@ -249,7 +255,7 @@ var INJECT = (function (document) {
             return Object.create(Element.prototype, fakeElementDescriptor);
         };
 
-        nativeCode(document.getElementById, 'getElementById');
+        nativeCode(document.getElementById);
     });
 
     script.pushSelfInvoking(function injectCreateElement () {
@@ -259,7 +265,7 @@ var INJECT = (function (document) {
             return;
         }
 
-        document.createElement = function (tagName) {
+        document.createElement = function createElement (tagName) {
             var element = realCreateElement(tagName),
                 elementId;
 
@@ -278,7 +284,7 @@ var INJECT = (function (document) {
             return element;
         };
 
-        nativeCode(document.createElement, 'createElement');
+        nativeCode(document.createElement);
     });
 
     script.pushSelfInvoking(function injectGetComputedStyle () {
@@ -291,7 +297,7 @@ var INJECT = (function (document) {
             return;
         }
 
-        window.getComputedStyle = function (element, pseudoElt) {
+        window.getComputedStyle = function getComputedStyle (element, pseudoElt) {
             try {
                 return realGetComputedStyle(element, pseudoElt);
             } catch (e) {
@@ -299,7 +305,7 @@ var INJECT = (function (document) {
             }
         };
 
-        nativeCode(window.getComputedStyle, 'getComputedStyle');
+        nativeCode(window.getComputedStyle);
     });
 
     script.pushSelfInvoking(function injectAppendChild () {
@@ -309,7 +315,7 @@ var INJECT = (function (document) {
             return;
         }
 
-        Node.prototype.appendChild = function (child) {
+        Node.prototype.appendChild = function appendChild (child) {
             try {
                 return realAppendChild.call(this, child);
             } catch (e) {
@@ -317,7 +323,7 @@ var INJECT = (function (document) {
             }
         };
 
-        nativeCode(Node.prototype.appendChild, 'appendChild');
+        nativeCode(Node.prototype.appendChild);
     });
 
     script.pushSelfInvoking(function injectRemoveChild () {
@@ -327,7 +333,7 @@ var INJECT = (function (document) {
             return;
         }
 
-        Node.prototype.removeChild = function (child) {
+        Node.prototype.removeChild = function removeChild (child) {
             try {
                 return realRemoveChild.call(this, child);
             } catch (e) {
@@ -335,7 +341,36 @@ var INJECT = (function (document) {
             }
         };
 
-        nativeCode(Node.prototype.removeChild, 'removeChild');
+        nativeCode(Node.prototype.removeChild);
+    });
+
+    script.pushSelfInvoking(function injectImageConstructor () {
+        var realImageConstructor = window.Image;
+
+        if (mode !== 'experimental') {
+            return;
+        }
+
+        window.Image = function HTMLImageElement (width, height) {
+            var imageElement = new realImageConstructor(width, height),
+                imageSrc;
+
+            Object.defineProperty(imageElement, 'src', {
+                get: function () {
+                    return imageSrc;
+                },
+
+                set: function (src) {
+                    imageSrc = src;
+
+                    imageElement.setAttribute('src', src);
+                }
+            });
+
+            return imageElement;
+        };
+
+        nativeCode(window.Image);
     });
 
     /*
@@ -367,8 +402,9 @@ var INJECT = (function (document) {
             bannedSetTimeoutNames: [],
             bannedSetTimeoutContents:  [],
             jQuerySelectors: [],
-            filteredIdContents: [],
-            allowedIdContents: []
+            idBlacklist: [],
+            idWhitelist: [],
+            domainBlacklist: []
         };
 
         self.mode = 'normal';
@@ -490,4 +526,5 @@ var INJECT = (function (document) {
     };
 
     return _INJECT;
+
 })(document);

@@ -19,9 +19,7 @@
 var SCRIPT = (function () {
     'use strict';
 
-    var _SCRIPT = SCRIPT || {},
-
-        script = [];
+    var _SCRIPT = SCRIPT || {};
 
     _SCRIPT.create = function () {
         var self = {
