@@ -39,7 +39,7 @@
     inject.script.pushAssignment('successfulAssertionCounter', 0);
     inject.script.pushAssignment('errorAssertionCounter', 0);
 
-    inject.set.windowProperties = [
+    inject.normal.windowProperties = [
         INJECT.pair('testNull', null),
         INJECT.pair('testUndefined', undefined),
         INJECT.pair('testTrue', true),
@@ -51,20 +51,20 @@
         INJECT.pair('test.nested.property', null)
     ];
 
-    inject.set.baitClasses = [
+    inject.normal.baitClasses = [
         INJECT.value('testBaitClass1'),
         INJECT.value('testBaitClass2')
     ];
 
-    inject.set.bannedSetTimeoutNames = [
+    inject.normal.bannedSetTimeoutNames = [
         INJECT.value('setTimeoutBannedName')
     ];
 
-    inject.set.bannedSetTimeoutContents = [
+    inject.normal.bannedSetTimeoutContents = [
         INJECT.value('setTimeoutBannedContent')
     ];
 
-    inject.set.jQuerySelectors = [
+    inject.normal.jQuerySelectors = [
         INJECT.pair('#testIdSelector', { length: 1 })
     ];
 
