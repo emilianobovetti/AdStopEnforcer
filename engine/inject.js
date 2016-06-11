@@ -242,7 +242,7 @@ var INJECT = (function (document) {
             var realElement = realGetElementById(id),
                 fakeElementDescriptor = {}, key;
 
-            if ( ! isBlacklistedId(id) || ! realElement) {
+            if ( ! realElement || ! isBlacklistedId(id)) {
                 return realElement;
             }
 
@@ -267,18 +267,18 @@ var INJECT = (function (document) {
 
         document.createElement = function createElement (tagName) {
             var element = realCreateElement(tagName),
-                elementId;
+                id, src;
 
             Object.defineProperty(element, 'id', {
-                get: function () {
-                    return elementId;
-                },
+                get: function () { return id; },
 
-                set: function (id) {
-                    elementId = id;
+                set: function (x) { element.setAttribute('id', id = x); }
+            });
 
-                    element.setAttribute('id', id);
-                }
+            Object.defineProperty(element, 'src', {
+                get: function () { return src; },
+
+                set: function (x) { element.setAttribute('src', src = x); }
             });
 
             return element;
@@ -352,40 +352,48 @@ var INJECT = (function (document) {
         }
 
         window.Image = function HTMLImageElement (width, height) {
-            var imageElement = new realImageConstructor(width, height),
-                imageSrc;
+            var element = new realImageConstructor(width, height),
+                src;
 
-            Object.defineProperty(imageElement, 'src', {
-                get: function () {
-                    return imageSrc;
-                },
+            Object.defineProperty(element, 'src', {
+                get: function () { return src; },
 
-                set: function (src) {
-                    imageSrc = src;
-
-                    imageElement.setAttribute('src', src);
-                }
+                set: function (x) { element.setAttribute('src', src = x); }
             });
 
-            return imageElement;
+            return element;
         };
 
         nativeCode(window.Image);
     });
 
     /*
-     * injectArrayToString takes an array of objects,
-     * filters the array with domainCheck property
-     * and returns a string representing the source of array.
-     * For each object in array the toString method is called
-     * to convert the object to string
+     * Returns a string representing the source of the array.
+     *
+     * INJECT objects are filtered for the domainCheck property
+     * and their toString method is called to get their source.
+     *
+     * For every other value JSON.stringify is used to get
+     * the value's source.
      */
     function injectArrayToString (array) {
-        array = array.filter(function (x) { return x && x.domainCheck; });
+        return array.reduce(function (acc, item, index) {
+            if ( ! item || item.domainCheck === false) {
+                return acc;
+            }
 
-        return '[' + array.reduce(function (acc, item, idx) {
-                return acc + (idx ? ',' : '') + item.toString()
-            }, '') + ']';
+            if (index > 0) {
+                acc += ',';
+            }
+
+            if (item.domainCheck === true) {
+                acc += item.toString();
+            } else {
+                acc += JSON.stringify(item);
+            }
+
+            return acc;
+        }, '[') + ']';
     }
 
     /*
@@ -396,30 +404,31 @@ var INJECT = (function (document) {
 
         self.script = script;
 
-        self.set = {
-            windowProperties: [],
-            baitClasses: [],
-            bannedSetTimeoutNames: [],
-            bannedSetTimeoutContents:  [],
-            jQuerySelectors: [],
-            idBlacklist: [],
-            idWhitelist: [],
-            domainBlacklist: []
-        };
-
         self.mode = 'normal';
 
         self.debug = false;
+
+        self.normal = {};
+
+        self.experimental = {};
 
         self.run = function () {
             if (self.mode === 'off') {
                 return self;
             }
 
+            if (self.mode !== 'experimental') {
+                self.experimental = {};
+            }
+
             self.script.pushAssignment('mode', '"' + self.mode + '"');
 
-            Object.keys(self.set).forEach(function (name) {
-                self.script.pushAssignment(name, injectArrayToString(self.set[name]));
+            Object.keys(self.normal).forEach(function (name) {
+                self.script.pushAssignment(name, injectArrayToString(self.normal[name]));
+            });
+
+            Object.keys(self.experimental).forEach(function (name) {
+                self.script.pushAssignment(name, injectArrayToString(self.experimental[name]));
             });
 
             setTimeout(function () {

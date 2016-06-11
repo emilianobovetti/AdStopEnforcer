@@ -25,126 +25,123 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
 
     inject.debug = false;
 
+    if (inject.mode === 'off') {
+        return;
+    }
+
+    /*
+     * Variabile names and values to be injected.
+     * They can't be overridden.
+     */
+    inject.normal.windowProperties = [
+        INJECT.pair('fuckAdBlock', INJECT.fakeFab),
+        INJECT.pair('blockAdBlock', INJECT.fakeFab),
+        INJECT.pair('sniffAdBlock', INJECT.fakeFab),
+        INJECT.pair('cadetect', INJECT.fakeFab),
+        INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
+        INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
+        INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
+        INJECT.pair('is_adblock_detect', false),
+        INJECT.pair('adbActive', false),
+        INJECT.pair('google_ad_client', 'pub'),
+
+        INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
+        INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
+        INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'), // TODO
+        INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
+    ];
+
+    /*
+     * Bait classes.
+     * If one of these classes are passed to Element.prototype.setAttribute,
+     * the element class is not setted.
+     */
+    inject.normal.baitClasses = [
+        'pub_300x250',
+        'pub_300x250m',
+        'pub_728x90',
+        'text-ad',
+        'textAd',
+        'text_ad',
+        'text_ads',
+        'text-ads',
+        'text-ad-links'
+    ];
+
+    /*
+     * Function names that can't be called through setTimeout().
+     */
+    inject.normal.bannedSetTimeoutNames = [
+        INJECT.value('adsBlock', 'el-nation.com')
+    ];
+
+    /*
+     * Values in this array cannot appear in code of functions that
+     * are passed to setTimeout().
+     */
+    inject.normal.bannedSetTimeoutContents = [
+        INJECT.value('displayAdBlockMessage', 'forbes.com'),
+        INJECT.value('adsbygoogle', 'theplace2.ru')
+    ];
+
+    /*
+     * Filtered jQuery selector and an object of injected properties.
+     */
+    inject.normal.jQuerySelectors = [
+        INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
+    ];
+
     /*
      * Experimental only
      */
-    if (inject.mode === 'experimental') {
+    inject.experimental.idBlacklist = [
+        'ad',
+        'Ad',
+        'AD',
+        'bnr-',
+        'paid',
+        'sponsor',
+        'annonse',
+        'sky-left',
+        'upperMpu',
+        'openx-slc',
+        'bannerid',
+        'glinkswrapper'
+    ];
 
-        inject.set.idBlacklist = [
-            INJECT.value('ad'),
-            INJECT.value('Ad'),
-            INJECT.value('AD'),
-            INJECT.value('bnr-'),
-            INJECT.value('paid'),
-            INJECT.value('sponsor'),
-            INJECT.value('annonse'),
-            INJECT.value('sky-left'),
-            INJECT.value('upperMpu'),
-            INJECT.value('openx-slc'),
-            INJECT.value('bannerid'),
-            INJECT.value('glinkswrapper')
-        ];
+    inject.experimental.idWhitelist = [
+        'add',
+        'admin',
+        'Admin',
+        'ADMIN',
+        'load',
+        // facebook whitelist
+        'pagelet_advertiser_panel',
+        'pagelet_above_header_timeline'
+    ];
 
-        inject.set.idWhitelist = [
-            INJECT.value('add'),
-            INJECT.value('admin'),
-            INJECT.value('Admin'),
-            INJECT.value('ADMIN'),
-            INJECT.value('load'),
-            // facebook whitelist
-            INJECT.value('pagelet_advertiser_panel'),
-            INJECT.value('pagelet_above_header_timeline')
-        ];
+    inject.experimental.domainBlacklist = [
+        'agoda.net',
+        'ad.mail.ru',
+        'adn.ebay.com',
+        'juicyads.com',
+        'as.inbox.com',
+        'antiblock.org',
+        'ads.yahoo.com',
+        'ads.zynga.com',
+        'ads.twitter.com',
+        'promote.pair.com',
+        'ad.foxnetworks.com',
+        'a.livesportmedia.eu',
+        'advertising.aol.com',
+        'cas.clickability.com',
+        'advertising.yahoo.com',
+        'adsatt.espn.starwave.com',
+        'partnerads.ysm.yahoo.com',
+        'adsatt.abcnews.starwave.com',
+        'www.doubleclickbygoogle.com',
+        'pagead2.googlesyndication.com'
+    ];
 
-        inject.set.domainBlacklist = [
-            INJECT.value('agoda.net'),
-            INJECT.value('ad.mail.ru'),
-            INJECT.value('adn.ebay.com'),
-            INJECT.value('juicyads.com'),
-            INJECT.value('as.inbox.com'),
-            INJECT.value('ads.yahoo.com'),
-            INJECT.value('ads.zynga.com'),
-            INJECT.value('ads.twitter.com'),
-            INJECT.value('promote.pair.com'),
-            INJECT.value('ad.foxnetworks.com'),
-            INJECT.value('a.livesportmedia.eu'),
-            INJECT.value('advertising.aol.com'),
-            INJECT.value('cas.clickability.com'),
-            INJECT.value('advertising.yahoo.com'),
-            INJECT.value('adsatt.espn.starwave.com'),
-            INJECT.value('partnerads.ysm.yahoo.com'),
-            INJECT.value('adsatt.abcnews.starwave.com'),
-            INJECT.value('www.doubleclickbygoogle.com')
-        ];
-    }
-
-    /*
-     * Normal and experimental
-     */
-    if (inject.mode !== 'off') {
-
-        /*
-         * Variabile names and values to be injected.
-         * They can't be overridden.
-         */
-        inject.set.windowProperties = [
-            INJECT.pair('fuckAdBlock', INJECT.fakeFab),
-            INJECT.pair('blockAdBlock', INJECT.fakeFab),
-            INJECT.pair('sniffAdBlock', INJECT.fakeFab),
-            INJECT.pair('cadetect', INJECT.fakeFab),
-            INJECT.pair('FuckAdBlock', INJECT.fakeFabConstructor),
-            INJECT.pair('BlockAdBlock', INJECT.fakeFabConstructor),
-            INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
-            INJECT.pair('is_adblock_detect', false),
-            INJECT.pair('adbActive', false),
-
-            INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
-            INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
-            INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'), // TODO
-            INJECT.pair('xaZlE', INJECT.emptyFunction, 'kisscartoon.me')
-        ];
-
-        /*
-         * Bait classes.
-         * If one of these classes are passed to Element.prototype.setAttribute,
-         * the element class is not setted.
-         */
-        inject.set.baitClasses = [
-            INJECT.value('pub_300x250'),
-            INJECT.value('pub_300x250m'),
-            INJECT.value('pub_728x90'),
-            INJECT.value('text-ad'),
-            INJECT.value('textAd'),
-            INJECT.value('text_ad'),
-            INJECT.value('text_ads'),
-            INJECT.value('text-ads'),
-            INJECT.value('text-ad-links')
-        ];
-
-        /*
-         * Function names that can't be called through setTimeout().
-         */
-        inject.set.bannedSetTimeoutNames = [
-            INJECT.value('adsBlock', 'el-nation.com')
-        ];
-
-        /*
-         * Values in this array cannot appear in code of functions that
-         * are passed to setTimeout().
-         */
-        inject.set.bannedSetTimeoutContents = [
-            INJECT.value('displayAdBlockMessage', 'forbes.com'),
-            INJECT.value('adsbygoogle', 'theplace2.ru')
-        ];
-
-        /*
-         * Filtered jQuery selector and an object of injected properties.
-         */
-        inject.set.jQuerySelectors = [
-            INJECT.pair('#vipchat', { length: 1 }, ['vipbox.tv', 'vipbox.sx'])
-        ];
-
-        inject.run();
-    }
-
+    inject.run();
 });
