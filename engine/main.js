@@ -23,7 +23,8 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
 
     inject.mode = response.storage || 'normal';
 
-    inject.debug = false;
+    // log debug info
+    inject.debug = true;
 
     if (inject.mode === 'off') {
         return;
@@ -43,7 +44,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
         INJECT.pair('is_adblock_detect', false),
         INJECT.pair('adbActive', false),
-        INJECT.pair('google_ad_client', 'pub'),
+        INJECT.pair('google_ad_client', 'pub'), // antiblock.org
 
         INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
         INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
@@ -123,9 +124,11 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     inject.experimental.domainBlacklist = [
         'agoda.net',
         'ad.mail.ru',
+        's0.2mdn.net',
         'adn.ebay.com',
         'juicyads.com',
         'as.inbox.com',
+        'b.ifmnwi.club',
         'antiblock.org',
         'ads.yahoo.com',
         'ads.zynga.com',
@@ -135,7 +138,10 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'a.livesportmedia.eu',
         'advertising.aol.com',
         'cas.clickability.com',
+        'www.paypalobjects.com',
         'advertising.yahoo.com',
+        'native.sharethrough.com',
+        'pubads.g.doubleclick.net',
         'adsatt.espn.starwave.com',
         'partnerads.ysm.yahoo.com',
         'adsatt.abcnews.starwave.com',

@@ -186,21 +186,21 @@ var INJECT = (function (document) {
         return isBanned;
     });
 
-    script.pushFunction(function urlToDomain (url) {
+    script.pushFunction(function stripUrl (url) {
         if (url.startsWith('//')) {
-            url = url.substring(2);
+            return url.substring(2);
         } else if (url.indexOf('://') > -1) {
-            url = url.split('://')[1];
+            return url.split('://')[1];
+        } else {
+            return url;
         }
-
-        return url.split('/')[0].split(':')[0];
     });
 
     script.pushFunction(function isBlacklistedSrc (src) {
-        var domain = urlToDomain(src);
+        var url = stripUrl(src);
 
         return domainBlacklist.reduce(function (acc, banned) {
-            return acc || domain === banned;
+            return acc || url.startsWith(banned);
         }, false);
     });
 
@@ -208,7 +208,6 @@ var INJECT = (function (document) {
         var realSetAttribute = Element.prototype.setAttribute;
 
         if (baitClasses.length == 0 && mode !== 'experimental') {
-            // nothing to ban
             return;
         }
 
@@ -224,6 +223,8 @@ var INJECT = (function (document) {
                     return acc || baitClasses.indexOf(item) > -1;
                 }, false);
             }
+
+            debug && isBanned && console.log('[FuckFuckAdBlock]', '[banned attribute]', name, value);
 
             isBanned || realSetAttribute.call(this, name, value);
         };
@@ -246,13 +247,21 @@ var INJECT = (function (document) {
                 return realElement;
             }
 
+            if (fakeElements[id]) {
+                return fakeElements[id];
+            }
+
             for (key in realElement) {
                 fakeElementDescriptor[key] = { value: realElement[key] };
             }
 
             fakeElementDescriptor.offsetParent = { value: document.body };
 
-            return Object.create(Element.prototype, fakeElementDescriptor);
+            fakeElements[id] = Object.create(Element.prototype, fakeElementDescriptor);
+
+            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fakeElements[id]);
+
+            return fakeElements[id];
         };
 
         nativeCode(document.getElementById);
@@ -292,8 +301,8 @@ var INJECT = (function (document) {
 
         if (mode !== 'experimental') {
             // if no fake element is returned from
-            // document.getElementById, so there
-            // is no need to inject window.getComputedStyle
+            // document.getElementById, there is no need
+            // to inject window.getComputedStyle
             return;
         }
 
@@ -301,7 +310,13 @@ var INJECT = (function (document) {
             try {
                 return realGetComputedStyle(element, pseudoElt);
             } catch (e) {
-                return { display: 'block' };
+                if (fakeElements[element.id]) {
+                    debug && console.log('[FuckFuckAdBlock]', '[getComputedStyle]', element);
+
+                    return { display: 'block' }; // TODO
+                } else {
+                    throw e;
+                }
             }
         };
 
@@ -319,7 +334,13 @@ var INJECT = (function (document) {
             try {
                 return realAppendChild.call(this, child);
             } catch (e) {
-                return child;
+                if (fakeElements[child.id]) {
+                    debug && console.log('[FuckFuckAdBlock]', '[appendChild]', child);
+
+                    return child;
+                } else {
+                    throw e;
+                }
             }
         };
 
@@ -337,7 +358,13 @@ var INJECT = (function (document) {
             try {
                 return realRemoveChild.call(this, child);
             } catch (e) {
-                return child;
+                if (fakeElements[child.id]) {
+                    debug && console.log('[FuckFuckAdBlock]', '[removeChild]', child);
+
+                    return child;
+                } else {
+                    throw e;
+                }
             }
         };
 
@@ -422,6 +449,8 @@ var INJECT = (function (document) {
             }
 
             self.script.pushAssignment('mode', '"' + self.mode + '"');
+            self.script.pushAssignment('debug', self.debug === true);
+            self.script.pushAssignment('fakeElements', '{}');
 
             Object.keys(self.normal).forEach(function (name) {
                 self.script.pushAssignment(name, injectArrayToString(self.normal[name]));
@@ -437,7 +466,7 @@ var INJECT = (function (document) {
                 scriptElement.textContent = self.script.render();
 
                 if (self.debug === true) {
-                    console.log(scriptElement.textContent);
+                    console.log('[FuckFuckAdBlock]', scriptElement.textContent);
                 }
 
                 (document.head || document.documentElement).appendChild(scriptElement);
@@ -526,9 +555,7 @@ var INJECT = (function (document) {
                 out += (out.length > 1 ? ',"' : '"') + property + '":' + valueToString(self[property]);
             });
 
-            out += '}';
-
-            return out;
+            return out + '}';
         };
 
         return self;
