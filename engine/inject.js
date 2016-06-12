@@ -240,28 +240,39 @@ var INJECT = (function (document) {
         }
 
         document.getElementById = function getElementById (id) {
-            var realElement = realGetElementById(id),
-                fakeElementDescriptor = {}, key;
-
-            if ( ! realElement || ! isBlacklistedId(id)) {
-                return realElement;
-            }
+            var element, fakeElement;
 
             if (fakeElements[id]) {
                 return fakeElements[id];
             }
 
-            for (key in realElement) {
-                fakeElementDescriptor[key] = { value: realElement[key] };
+            element = realGetElementById(id);
+
+            if ( ! element || ! isBlacklistedId(id)) {
+                return element;
             }
 
-            fakeElementDescriptor.offsetParent = { value: document.body };
+            fakeElement = (function () {
+                var key, value, desc = {};
 
-            fakeElements[id] = Object.create(Element.prototype, fakeElementDescriptor);
+                for (key in element) {
+                    value = element[key];
 
-            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fakeElements[id]);
+                    if (typeof value == 'function') {
+                        desc[key] = { value: value.bind(element) };
+                    } else {
+                        desc[key] = { value: value };
+                    }
+                }
 
-            return fakeElements[id];
+                element.offsetParent || (desc.offsetParent = { value: document.body });
+
+                return Object.create(Element.prototype, desc);
+            })();
+
+            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fakeElement);
+
+            return fakeElements[id] = fakeElement;
         };
 
         nativeCode(document.getElementById);

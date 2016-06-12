@@ -24,7 +24,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     inject.mode = response.storage || 'normal';
 
     // log debug info
-    inject.debug = true;
+    inject.debug = false;
 
     if (inject.mode === 'off') {
         return;
@@ -118,7 +118,8 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'load',
         // facebook whitelist
         'pagelet_advertiser_panel',
-        'pagelet_above_header_timeline'
+        'pagelet_above_header_timeline',
+        'hyperfeed_story_id'
     ];
 
     inject.experimental.domainBlacklist = [
