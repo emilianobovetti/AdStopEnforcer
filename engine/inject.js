@@ -204,6 +204,52 @@ var INJECT = (function (document) {
         }, false);
     });
 
+    script.pushAssignment('getUniqueElementId', '(' + (function () {
+        var uniqueElementId = 0;
+
+        return function getUniqueElementId () {
+            return uniqueElementId += 1;
+        };
+    }).toString() + ')()');
+
+    script.pushAssignment('injectedDescriptors', '[]');
+
+    script.pushFunction(function fakeElement (element, properties) {
+        var descriptor;
+
+        function createDescriptor () {
+            var key, value, desc = {};
+
+            for (key in element) {
+                value = element[key];
+
+                if (typeof value == 'function') {
+                    desc[key] = { value: value.bind(element) };
+                } else {
+                    desc[key] = { value: value };
+                }
+            }
+
+            desc.__uniqueId = { value: getUniqueElementId() };
+
+            injectedDescriptors[desc.__uniqueId] = desc;
+
+            return desc;
+        }
+
+        if (element.__uniqueId !== undefined) {
+            descriptor = injectedDescriptors[element.__uniqueId];
+        } else {
+            descriptor = createDescriptor();
+        }
+
+        Object.keys(properties || {}).forEach(function (key) {
+            descriptor[key] = { value: properties[key] };
+        });
+
+        return Object.create(Element.prototype, descriptor);
+    });
+
     script.pushSelfInvoking(function injectSetAttribute () {
         var realSetAttribute = Element.prototype.setAttribute;
 
@@ -233,17 +279,18 @@ var INJECT = (function (document) {
     });
 
     script.pushSelfInvoking(function injectGetElementById () {
-        var realGetElementById = document.getElementById.bind(document);
+        var realGetElementById = document.getElementById.bind(document),
+            mapIdFakeElement = {};
 
         if (mode !== 'experimental') {
             return;
         }
 
         document.getElementById = function getElementById (id) {
-            var element, fakeElement;
+            var element, fake;
 
-            if (fakeElements[id]) {
-                return fakeElements[id];
+            if (mapIdFakeElement[id]) {
+                return mapIdFakeElement[id];
             }
 
             element = realGetElementById(id);
@@ -252,27 +299,12 @@ var INJECT = (function (document) {
                 return element;
             }
 
-            fakeElement = (function () {
-                var key, value, desc = {};
+            fake = fakeElement(element, { offsetParent: document.body });
+            //fake = fakeElement(element);
 
-                for (key in element) {
-                    value = element[key];
+            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fake);
 
-                    if (typeof value == 'function') {
-                        desc[key] = { value: value.bind(element) };
-                    } else {
-                        desc[key] = { value: value };
-                    }
-                }
-
-                element.offsetParent || (desc.offsetParent = { value: document.body });
-
-                return Object.create(Element.prototype, desc);
-            })();
-
-            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fakeElement);
-
-            return fakeElements[id] = fakeElement;
+            return mapIdFakeElement[id] = fake;
         };
 
         nativeCode(document.getElementById);
@@ -318,16 +350,12 @@ var INJECT = (function (document) {
         }
 
         window.getComputedStyle = function getComputedStyle (element, pseudoElt) {
-            try {
-                return realGetComputedStyle(element, pseudoElt);
-            } catch (e) {
-                if (fakeElements[element.id]) {
-                    debug && console.log('[FuckFuckAdBlock]', '[getComputedStyle]', element);
+            if (element.__uniqueId !== undefined) {
+                debug && console.log('[FuckFuckAdBlock]', '[getComputedStyle]', element);
 
-                    return { display: 'block' }; // TODO
-                } else {
-                    throw e;
-                }
+                return { display: 'block' }; // TODO
+            } else {
+                return realGetComputedStyle(element, pseudoElt);
             }
         };
 
@@ -342,16 +370,12 @@ var INJECT = (function (document) {
         }
 
         Node.prototype.appendChild = function appendChild (child) {
-            try {
-                return realAppendChild.call(this, child);
-            } catch (e) {
-                if (fakeElements[child.id]) {
-                    debug && console.log('[FuckFuckAdBlock]', '[appendChild]', child);
+            if (child.__uniqueId !== undefined) {
+                debug && console.log('[FuckFuckAdBlock]', '[appendChild]', child);
 
-                    return child;
-                } else {
-                    throw e;
-                }
+                return fakeElement(child, { offsetParent: this });
+            } else {
+                return realAppendChild.call(this, child);
             }
         };
 
@@ -366,16 +390,12 @@ var INJECT = (function (document) {
         }
 
         Node.prototype.removeChild = function removeChild (child) {
-            try {
-                return realRemoveChild.call(this, child);
-            } catch (e) {
-                if (fakeElements[child.id]) {
-                    debug && console.log('[FuckFuckAdBlock]', '[removeChild]', child);
+            if (child.__uniqueId !== undefined) {
+                debug && console.log('[FuckFuckAdBlock]', '[removeChild]', child);
 
-                    return child;
-                } else {
-                    throw e;
-                }
+                return fakeElement(child, { offsetParent: null });;
+            } else {
+                return realRemoveChild.call(this, child);
             }
         };
 
@@ -461,7 +481,6 @@ var INJECT = (function (document) {
 
             self.script.pushAssignment('mode', '"' + self.mode + '"');
             self.script.pushAssignment('debug', self.debug === true);
-            self.script.pushAssignment('fakeElements', '{}');
 
             Object.keys(self.normal).forEach(function (name) {
                 self.script.pushAssignment(name, injectArrayToString(self.normal[name]));
@@ -475,10 +494,6 @@ var INJECT = (function (document) {
                 var scriptElement = document.createElement('script');
 
                 scriptElement.textContent = self.script.render();
-
-                if (self.debug === true) {
-                    console.log('[FuckFuckAdBlock]', scriptElement.textContent);
-                }
 
                 (document.head || document.documentElement).appendChild(scriptElement);
                 scriptElement.remove();

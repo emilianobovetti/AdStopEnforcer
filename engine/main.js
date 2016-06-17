@@ -44,8 +44,10 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         INJECT.pair('onAdBlockStart', INJECT.emptyFunction),
         INJECT.pair('is_adblock_detect', false),
         INJECT.pair('adbActive', false),
-        INJECT.pair('google_ad_client', 'pub'), // antiblock.org
+        INJECT.pair('google_ad_client', ''), // antiblock.org
+        INJECT.pair('niceAdsCheck', true),
 
+        INJECT.pair('google_onload_fired', true, 'wired.com'),
         INJECT.pair('tmgAds.adblock.status', 1, 'telegraph.co.uk'),
         INJECT.pair('fbs_settings.classes', 'WyJhIiwiYiJd', 'forbes.com'),
         INJECT.pair('CWTVIsAdBlocking', INJECT.emptyFunction, 'cwtv.com'), // TODO
@@ -112,14 +114,17 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
 
     inject.experimental.idWhitelist = [
         'add',
+        'load',
+        'head',
+        'Head',
         'admin',
         'Admin',
         'ADMIN',
-        'load',
+        'hadfield',
         // facebook whitelist
-        'pagelet_advertiser_panel',
-        'pagelet_above_header_timeline',
-        'hyperfeed_story_id'
+        'pagelet_side_ads',
+        'hyperfeed_story_id',
+        'pagelet_advertiser_panel'
     ];
 
     inject.experimental.domainBlacklist = [
@@ -129,10 +134,12 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'adn.ebay.com',
         'juicyads.com',
         'as.inbox.com',
+        'c1.popads.net',
         'b.ifmnwi.club',
         'antiblock.org',
         'ads.yahoo.com',
         'ads.zynga.com',
+        't.mdn2015x4.com',
         'ads.twitter.com',
         'promote.pair.com',
         'ad.foxnetworks.com',
@@ -141,13 +148,15 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'cas.clickability.com',
         'www.paypalobjects.com',
         'advertising.yahoo.com',
+        't.mtagmonetizationb.com',
         'native.sharethrough.com',
         'pubads.g.doubleclick.net',
         'adsatt.espn.starwave.com',
         'partnerads.ysm.yahoo.com',
         'adsatt.abcnews.starwave.com',
         'www.doubleclickbygoogle.com',
-        'pagead2.googlesyndication.com'
+        'pagead2.googlesyndication.com',
+        'securepubads.g.doubleclick.net'
     ];
 
     inject.run();
