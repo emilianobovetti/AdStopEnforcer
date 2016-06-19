@@ -24,7 +24,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     inject.mode = response.storage || 'normal';
 
     // log debug info
-    inject.debug = false;
+    inject.debug = true;
 
     if (inject.mode === 'off') {
         return;
@@ -114,7 +114,9 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
 
     inject.experimental.idWhitelist = [
         'add',
+        'Add',
         'load',
+        'Load',
         'head',
         'Head',
         'admin',

@@ -351,7 +351,7 @@ var INJECT = (function (document) {
 
         window.getComputedStyle = function getComputedStyle (element, pseudoElt) {
             if (element.__uniqueId !== undefined) {
-                debug && console.log('[FuckFuckAdBlock]', '[getComputedStyle]', element);
+                debug && console.log('[FuckFuckAdBlock]', '[fake getComputedStyle]', element);
 
                 return { display: 'block' }; // TODO
             } else {

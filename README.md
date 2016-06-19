@@ -15,7 +15,7 @@ Usual anti AdBlock detection mode.
 
 ![experimental](https://cloud.githubusercontent.com/assets/3957026/16162723/8053ef18-34d5-11e6-8653-81eddd029305.jpg)
 
-A more powerful system can prevent on many other sites to detect AdBlock, but an higher risk to break some sites.
+A more powerful system can prevent many other sites to detect AdBlock, but an higher risk to break some sites.
 
 Every time mode is changed the page have to be refreshed to take effect.
 
