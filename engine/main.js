@@ -55,23 +55,6 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     ];
 
     /*
-     * Bait classes.
-     * If one of these classes are passed to Element.prototype.setAttribute,
-     * the element class is not setted.
-     */
-    inject.normal.baitClasses = [
-        'pub_300x250',
-        'pub_300x250m',
-        'pub_728x90',
-        'text-ad',
-        'textAd',
-        'text_ad',
-        'text_ads',
-        'text-ads',
-        'text-ad-links'
-    ];
-
-    /*
      * Function names that can't be called through setTimeout().
      */
     inject.normal.bannedSetTimeoutNames = [
@@ -95,13 +78,31 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     ];
 
     /*
+     * Bait classes.
+     * If one of these classes are passed to Element.prototype.setAttribute,
+     * the element class is not setted.
+     */
+    inject.normal.baitClasses = [
+        'pub_300x250',
+        'pub_300x250m',
+        'pub_728x90',
+        'text-ad',
+        'textAd',
+        'text_ad',
+        'text_ads',
+        'text-ads',
+        'text-ad-links'
+    ];
+
+    /*
      * Experimental only
      */
-    inject.experimental.idBlacklist = [
+    inject.experimental.keywordBlacklist = [
         'ad',
         'Ad',
         'AD',
         'bnr-',
+        'pub_',
         'paid',
         'sponsor',
         'annonse',
@@ -112,7 +113,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'glinkswrapper'
     ];
 
-    inject.experimental.idWhitelist = [
+    inject.experimental.keywordWhitelist = [
         'add',
         'Add',
         'load',

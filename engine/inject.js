@@ -172,15 +172,15 @@ var INJECT = (function (document) {
         Object.defineProperty(window, '$', { get: jQueryGetter, set: jQuerySetter });
     });
 
-    script.pushFunction(function isBlacklistedId (id) {
+    script.pushFunction(function isBlacklistedKeyword (key) {
         var isBanned = false;
 
-        isBanned = idBlacklist.reduce(function (acc, banned) {
-            return acc || id.indexOf(banned) > -1;
+        isBanned = keywordBlacklist.reduce(function (acc, banned) {
+            return acc || key.indexOf(banned) > -1;
         }, isBanned);
 
-        isBanned = idWhitelist.reduce(function (acc, allowed) {
-            return acc && id.indexOf(allowed) == -1;
+        isBanned = keywordWhitelist.reduce(function (acc, allowed) {
+            return acc && key.indexOf(allowed) == -1;
         }, isBanned);
 
         return isBanned;
@@ -261,7 +261,7 @@ var INJECT = (function (document) {
             var isBanned = false;
 
             if (name === 'id' && mode === 'experimental') {
-                isBanned = isBlacklistedId(value);
+                isBanned = isBlacklistedKeyword(value);
             } else if (name === 'src' && mode === 'experimental') {
                 isBanned = isBlacklistedSrc(value);
             } else if (name === 'class') {
@@ -295,7 +295,7 @@ var INJECT = (function (document) {
 
             element = realGetElementById(id);
 
-            if ( ! element || ! isBlacklistedId(id)) {
+            if ( ! element || ! isBlacklistedKeyword(id)) {
                 return element;
             }
 
@@ -337,6 +337,29 @@ var INJECT = (function (document) {
         };
 
         nativeCode(document.createElement);
+    });
+
+    script.pushSelfInvoking(function injectImageConstructor () {
+        var realImageConstructor = window.Image;
+
+        if (mode !== 'experimental') {
+            return;
+        }
+
+        window.Image = function HTMLImageElement (width, height) {
+            var element = new realImageConstructor(width, height),
+                src;
+
+            Object.defineProperty(element, 'src', {
+                get: function () { return src; },
+
+                set: function (x) { element.setAttribute('src', src = x); }
+            });
+
+            return element;
+        };
+
+        nativeCode(window.Image);
     });
 
     script.pushSelfInvoking(function injectGetComputedStyle () {
@@ -400,29 +423,6 @@ var INJECT = (function (document) {
         };
 
         nativeCode(Node.prototype.removeChild);
-    });
-
-    script.pushSelfInvoking(function injectImageConstructor () {
-        var realImageConstructor = window.Image;
-
-        if (mode !== 'experimental') {
-            return;
-        }
-
-        window.Image = function HTMLImageElement (width, height) {
-            var element = new realImageConstructor(width, height),
-                src;
-
-            Object.defineProperty(element, 'src', {
-                get: function () { return src; },
-
-                set: function (x) { element.setAttribute('src', src = x); }
-            });
-
-            return element;
-        };
-
-        nativeCode(window.Image);
     });
 
     /*
