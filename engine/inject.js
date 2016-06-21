@@ -278,6 +278,37 @@ var INJECT = (function (document) {
         nativeCode(Element.prototype.setAttribute);
     });
 
+    script.pushSelfInvoking(function injectCreateElement () {
+        var realCreateElement = document.createElement.bind(document);
+
+        document.createElement = function createElement (tagName) {
+            var element = realCreateElement(tagName),
+                id, src, className;
+
+            Object.defineProperty(element, 'id', {
+                get: function () { return id; },
+
+                set: function (x) { element.setAttribute('id', id = x); }
+            });
+
+            Object.defineProperty(element, 'src', {
+                get: function () { return src; },
+
+                set: function (x) { element.setAttribute('src', src = x); }
+            });
+
+            Object.defineProperty(element, 'className', {
+                get: function () { return className; },
+
+                set: function (x) { element.setAttribute('class', className = x); }
+            });
+
+            return element;
+        };
+
+        nativeCode(document.createElement);
+    });
+
     script.pushSelfInvoking(function injectGetElementById () {
         var realGetElementById = document.getElementById.bind(document),
             mapIdFakeElement = {};
@@ -300,6 +331,7 @@ var INJECT = (function (document) {
             }
 
             fake = fakeElement(element, { offsetParent: document.body });
+            // TODO offsetParent in appendChild method
             //fake = fakeElement(element);
 
             debug && console.log('[AdStopEnforcer]', '[fake elementById]', id, fake);
@@ -308,35 +340,6 @@ var INJECT = (function (document) {
         };
 
         nativeCode(document.getElementById);
-    });
-
-    script.pushSelfInvoking(function injectCreateElement () {
-        var realCreateElement = document.createElement.bind(document);
-
-        if (mode !== 'experimental') {
-            return;
-        }
-
-        document.createElement = function createElement (tagName) {
-            var element = realCreateElement(tagName),
-                id, src;
-
-            Object.defineProperty(element, 'id', {
-                get: function () { return id; },
-
-                set: function (x) { element.setAttribute('id', id = x); }
-            });
-
-            Object.defineProperty(element, 'src', {
-                get: function () { return src; },
-
-                set: function (x) { element.setAttribute('src', src = x); }
-            });
-
-            return element;
-        };
-
-        nativeCode(document.createElement);
     });
 
     script.pushSelfInvoking(function injectImageConstructor () {

@@ -2,6 +2,7 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
+   xmlns:osb="http://www.openswatchbook.org/uri/2009/osb"
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -21,6 +22,22 @@
    inkscape:export-ydpi="90">
   <defs
      id="defs4">
+    <linearGradient
+       id="linearGradient5244"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5246" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient5238"
+       osb:paint="solid">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop5240" />
+    </linearGradient>
     <linearGradient
        inkscape:collect="always"
        id="linearGradient3859">
@@ -63,7 +80,7 @@
        x2="61.846466"
        y2="911.82465"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.94700065,0,0,0.89476379,3.6188697,103.0177)" />
+       gradientTransform="matrix(0.97963921,0,0,0.89476379,1.5477079,103.0177)" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -72,9 +89,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="41.401204"
-     inkscape:cy="61.244695"
+     inkscape:zoom="2"
+     inkscape:cx="48.81579"
+     inkscape:cy="43.402064"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -91,7 +108,7 @@
        id="guide3813" />
     <sodipodi:guide
        orientation="1,0"
-       position="122,95.875"
+       position="124.00885,84.543455"
        id="guide3815" />
     <sodipodi:guide
        orientation="1,0"
@@ -111,7 +128,7 @@
        id="guide3877" />
     <sodipodi:guide
        orientation="1,0"
-       position="6.0104076,68.235804"
+       position="4.0216699,80.212426"
        id="guide3883" />
     <sodipodi:guide
        orientation="0,1"
@@ -140,25 +157,26 @@
      id="layer1"
      transform="translate(0,-924.36218)">
     <path
-       style="fill:#c50000;fill-opacity:1;stroke:#ffffff;stroke-width:4.6025629;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:0;stroke-dasharray:none"
-       d="m 6.0104076,987.3526 29.1118324,-55.0218 57.674385,0 L 122,987.25903 l -29.111829,55.02177 -57.308198,0.093 z"
+       style="fill:#c50000;fill-opacity:1;opacity:1;stroke:#000000;stroke-opacity:1;stroke-width:7;stroke-miterlimit:4;stroke-dasharray:none;stroke-linejoin:round"
+       d="m 4.0216699,987.39939 30.1151731,-55.06859 59.662135,0 30.209872,54.97494 -30.115171,55.06856 -59.283328,0.093 z"
        id="path3019-1"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:url(#linearGradient3865);fill-opacity:1;stroke:#ffffff;stroke-width:5.70941353;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
-       d="m 6.0104076,987.35256 29.1118314,-55.02176 57.674384,0 L 122,987.25898 l -29.111831,55.02182 -57.308197,0.093 z"
+       style="fill:url(#linearGradient3865);fill-opacity:1;stroke:#ffffff;stroke-width:5;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       d="m 4.0216699,987.35256 30.1151721,-55.02176 59.662134,0 30.209874,54.92818 -30.115172,55.02182 -59.283328,0.093 z"
        id="path3019"
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
-       style="font-size:101.75387573px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:TeX Gyre Adventor;-inkscape-font-specification:TeX Gyre Adventor Italic"
-       x="59.67878"
-       y="1024.8427"
+       style="font-size:110px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:center;line-height:125%;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#ffffff;fill-opacity:1;stroke:none;font-family:Droid Sans Fallback;-inkscape-font-specification:Droid Sans Fallback Italic"
+       x="54.717842"
+       y="1026.7747"
        id="text3879"
        sodipodi:linespacing="125%"><tspan
          sodipodi:role="line"
          id="tspan3881"
-         x="59.67878"
-         y="1024.8427">E</tspan></text>
+         x="54.717842"
+         y="1026.7747"
+         style="font-size:110px;font-style:italic;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Droid Sans Fallback;-inkscape-font-specification:Droid Sans Fallback Italic">E</tspan></text>
   </g>
 </svg>

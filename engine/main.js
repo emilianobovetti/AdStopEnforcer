@@ -24,7 +24,14 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     inject.mode = response.storage || 'normal';
 
     // log debug info
-    inject.debug = true;
+    inject.debug = false;
+
+    if (document.location.hostname.endsWith('google.com')) {
+        // TODO
+        // "Invalid rpc message origin.  vs https://plus.google.com" in cb=gapi.loaded_0:177
+        // until this error gets addressed do not run on google.com
+        return;
+    }
 
     if (inject.mode === 'off') {
         return;
@@ -83,24 +90,40 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
      * the element class is not setted.
      */
     inject.normal.baitClasses = [
-        'pub_300x250',
-        'pub_300x250m',
-        'pub_728x90',
-        'text-ad',
+        // FuckAdBlock
         'textAd',
+        'text-ad',
         'text_ad',
         'text_ads',
         'text-ads',
-        'text-ad-links'
+        'pub_728x90',
+        'pub_300x250',
+        'pub_300x250m',
+        'text-ad-links',
+
+        // ad fly
+        'isAd',
+        'homeAd',
+        'homeAd2',
+        'insertad',
+        'contentad',
+        'google_ad',
+        'iframe-ads',
+        'horizontalAd',
+        'leaderAdvert',
+        'googleAdsense',
+        'horizontal_ads',
+        'googleAd300x250',
+        'idGoogleAdsense',
+        'item-advertising',
+        'header-ad-wrapper'
     ];
 
     /*
      * Experimental only
      */
     inject.experimental.keywordBlacklist = [
-        'ad',
-        'Ad',
-        'AD',
+        'ad', 'Ad', 'AD',
         'bnr-',
         'pub_',
         'paid',
@@ -114,15 +137,11 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     ];
 
     inject.experimental.keywordWhitelist = [
-        'add',
-        'Add',
-        'load',
-        'Load',
-        'head',
-        'Head',
-        'admin',
-        'Admin',
-        'ADMIN',
+        'add', 'Add', 'ADD',
+        'load', 'Load', 'LOAD',
+        'head', 'Head', 'HEAD',
+        'fade', 'Fade', 'FADE',
+        'admin', 'Admin', 'ADMIN',
         'hadfield',
         // facebook whitelist
         'pagelet_side_ads',
@@ -159,7 +178,8 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'adsatt.abcnews.starwave.com',
         'www.doubleclickbygoogle.com',
         'pagead2.googlesyndication.com',
-        'securepubads.g.doubleclick.net'
+        'securepubads.g.doubleclick.net',
+        's3-us-west-2.amazonaws.com/ad-maven-public-cdn'
     ];
 
     inject.run();

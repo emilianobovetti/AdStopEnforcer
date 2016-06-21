@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "AdStopEnforcer",
     "short_name": "ASE",
-    "version": "0.4.0",
+    "version": "0.4.1",
 
     "description": "Prevent boring messages like \"disable your ad-blocker and refresh page to continue\"",
     "homepage_url": "https://github.com/emilianobovetti/AdStopEnforcer",
