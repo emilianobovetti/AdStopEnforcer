@@ -1,18 +1,18 @@
 /*
- * This file is part of FuckFuckAdBlock.
+ * This file is part of AdStopEnforcer.
  *
- * FuckFuckAdBlock is free software: you can redistribute it and/or modify
+ * AdStopEnforcer is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * FuckFuckAdBlock is distributed in the hope that it will be useful,
+ * AdStopEnforcer is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with FuckFuckAdBlock.  If not, see <http://www.gnu.org/licenses/>.
+ * along with AdStopEnforcer.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
 
@@ -270,7 +270,7 @@ var INJECT = (function (document) {
                 }, false);
             }
 
-            debug && isBanned && console.log('[FuckFuckAdBlock]', '[banned attribute]', name, value);
+            debug && isBanned && console.log('[AdStopEnforcer]', '[banned attribute]', name, value);
 
             isBanned || realSetAttribute.call(this, name, value);
         };
@@ -302,7 +302,7 @@ var INJECT = (function (document) {
             fake = fakeElement(element, { offsetParent: document.body });
             //fake = fakeElement(element);
 
-            debug && console.log('[FuckFuckAdBlock]', '[fake elementById]', id, fake);
+            debug && console.log('[AdStopEnforcer]', '[fake elementById]', id, fake);
 
             return mapIdFakeElement[id] = fake;
         };
@@ -374,7 +374,7 @@ var INJECT = (function (document) {
 
         window.getComputedStyle = function getComputedStyle (element, pseudoElt) {
             if (element.__uniqueId !== undefined) {
-                debug && console.log('[FuckFuckAdBlock]', '[fake getComputedStyle]', element);
+                debug && console.log('[AdStopEnforcer]', '[fake getComputedStyle]', element);
 
                 return { display: 'block' }; // TODO
             } else {
@@ -394,7 +394,7 @@ var INJECT = (function (document) {
 
         Node.prototype.appendChild = function appendChild (child) {
             if (child.__uniqueId !== undefined) {
-                debug && console.log('[FuckFuckAdBlock]', '[appendChild]', child);
+                debug && console.log('[AdStopEnforcer]', '[appendChild]', child);
 
                 return fakeElement(child, { offsetParent: this });
             } else {
@@ -414,7 +414,7 @@ var INJECT = (function (document) {
 
         Node.prototype.removeChild = function removeChild (child) {
             if (child.__uniqueId !== undefined) {
-                debug && console.log('[FuckFuckAdBlock]', '[removeChild]', child);
+                debug && console.log('[AdStopEnforcer]', '[removeChild]', child);
 
                 return fakeElement(child, { offsetParent: null });;
             } else {
