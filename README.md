@@ -1,5 +1,6 @@
-# ![logo-38](https://cloud.githubusercontent.com/assets/3957026/16240962/e190d098-37eb-11e6-9130-d3729a85e503.png)AdStopEnforcer
+# AdStopEnforcer  ![logo-16](https://cloud.githubusercontent.com/assets/3957026/16249735/808c63a2-3818-11e6-9783-41885b0bb975.png)
 
+Download from [addons.mozilla.org](https://addons.mozilla.org/firefox/addon/adstop-enforcer)
 
 *AdStopEnforcer* is a web extension meant to prevent those boring messages like `Please disable your ad-blocker and refresh page to continue`.
 
