@@ -1,5 +1,5 @@
-AdStopEnforcer
-==============
+# ![logo-128](https://cloud.githubusercontent.com/assets/3957026/16240801/1c582830-37eb-11e6-9822-08787b5542bb.png) AdStopEnforcer
+
 
 *AdStopEnforcer* is a web extension meant to prevent those boring messages like `Please disable your ad-blocker and refresh page to continue`.
 
