@@ -24,14 +24,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
     inject.mode = response.storage || 'normal';
 
     // log debug info
-    inject.debug = false;
-
-    if (document.location.hostname.endsWith('google.com')) {
-        // TODO
-        // "Invalid rpc message origin.  vs https://plus.google.com" in cb=gapi.loaded_0:177
-        // until this error gets addressed do not run on google.com
-        return;
-    }
+    inject.debug = true;
 
     if (inject.mode === 'off') {
         return;
@@ -149,7 +142,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'pagelet_advertiser_panel'
     ];
 
-    inject.experimental.domainBlacklist = [
+    inject.experimental.srcBlacklist = [
         'agoda.net',
         'ad.mail.ru',
         's0.2mdn.net',
@@ -168,6 +161,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'a.livesportmedia.eu',
         'advertising.aol.com',
         'cas.clickability.com',
+        'adplexmedia.adk2x.com',
         'www.paypalobjects.com',
         'advertising.yahoo.com',
         't.mtagmonetizationb.com',
@@ -178,8 +172,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'adsatt.abcnews.starwave.com',
         'www.doubleclickbygoogle.com',
         'pagead2.googlesyndication.com',
-        'securepubads.g.doubleclick.net',
-        's3-us-west-2.amazonaws.com/ad-maven-public-cdn'
+        'securepubads.g.doubleclick.net'
     ];
 
     inject.run();

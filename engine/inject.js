@@ -41,6 +41,8 @@ var INJECT = (function (document) {
             set: function (settedValue) {
                 var propertyCopy;
 
+                debug && settedValue !== undefined && console.log('[AdStopEnforcer]', key, '=', value);
+
                 if (keyList.length == 1) {
                     settedValue = value;
                 } else if (settedValue && typeof settedValue == 'object') {
@@ -130,6 +132,8 @@ var INJECT = (function (document) {
                 isBanned = isBanned || fn.toString().indexOf(bannedContent) > -1;
             });
 
+            debug && isBanned && console.log('[AdStopEnforcer]', '[banned setTimeout]', fn);
+
             isBanned || realSetTimeout(fn instanceof Function ? function () {
                 fn.apply(null, Array.prototype.slice.call(arguments, 2));
             } : fn, timeout);
@@ -156,6 +160,8 @@ var INJECT = (function (document) {
 
                 jQuerySelectors.forEach(function (item) {
                     if (selector === item.key) {
+                        debug && console.log('[AdStopEnforcer]', '[banned jQuerySelectors]', selector);
+
                         obj = deepMerge(obj, item.value);
                     }
                 });
@@ -199,7 +205,7 @@ var INJECT = (function (document) {
     script.pushFunction(function isBlacklistedSrc (src) {
         var url = stripUrl(src);
 
-        return domainBlacklist.reduce(function (acc, banned) {
+        return srcBlacklist.reduce(function (acc, banned) {
             return acc || url.startsWith(banned);
         }, false);
     });
@@ -264,6 +270,11 @@ var INJECT = (function (document) {
                 isBanned = isBlacklistedKeyword(value);
             } else if (name === 'src' && mode === 'experimental') {
                 isBanned = isBlacklistedSrc(value);
+
+                // we could make the client believe that
+                // the banned element has been loaded
+                //
+                //isBanned && this.onload();
             } else if (name === 'class') {
                 isBanned = value.split(' ').reduce(function (acc, item) {
                     return acc || baitClasses.indexOf(item) > -1;
@@ -282,25 +293,25 @@ var INJECT = (function (document) {
         var realCreateElement = document.createElement.bind(document);
 
         document.createElement = function createElement (tagName) {
-            var element = realCreateElement(tagName),
-                id, src, className;
+            var element = realCreateElement(tagName);
 
             Object.defineProperty(element, 'id', {
-                get: function () { return id; },
+                get: function () { return element.getAttribute('id'); },
 
-                set: function (x) { element.setAttribute('id', id = x); }
+                set: function (id) { element.setAttribute('id', id); }
             });
 
             Object.defineProperty(element, 'src', {
-                get: function () { return src; },
+                get: function () { return element.getAttribute('src'); },
 
-                set: function (x) { element.setAttribute('src', src = x); }
+                set: function (src) { element.setAttribute('src', src); }
             });
 
-            Object.defineProperty(element, 'className', {
-                get: function () { return className; },
 
-                set: function (x) { element.setAttribute('class', className = x); }
+            Object.defineProperty(element, 'className', {
+                get: function () { return element.getAttribute('class'); },
+
+                set: function (className) { element.setAttribute('class', className); }
             });
 
             return element;
@@ -354,9 +365,9 @@ var INJECT = (function (document) {
                 src;
 
             Object.defineProperty(element, 'src', {
-                get: function () { return src; },
+                get: function () { return element.getAttribute('src'); },
 
-                set: function (x) { element.setAttribute('src', src = x); }
+                set: function (src) { element.setAttribute('src', src); }
             });
 
             return element;
