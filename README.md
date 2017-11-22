@@ -2,7 +2,8 @@ This project is no longer maintained
 ------------------------------------
 
 I am sorry to say that, but it requires a lot of work. Since June 2016 I had not time to make the major improvements AdStopEnforcer needs. I loved this project and I hope someone found it useful.
-I thank you all : )
+
+Thank you all : )
 
 ------------------------------------
 
