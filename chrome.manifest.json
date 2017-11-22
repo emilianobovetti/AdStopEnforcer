@@ -4,7 +4,7 @@
     "short_name": "ASE",
     "version": "0.4.1",
 
-    "description": "Prevent boring messages like \"disable your ad-blocker and refresh page to continue\"",
+    "description": "Prevent boring messages like \"disable your ad-stopper and refresh page to continue\"",
     "homepage_url": "https://github.com/emilianobovetti/AdStopEnforcer",
     "author": "Emiliano Bovetti",
     "icons": {

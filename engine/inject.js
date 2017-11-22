@@ -271,10 +271,9 @@ var INJECT = (function (document) {
             } else if (name === 'src' && mode === 'experimental') {
                 isBanned = isBlacklistedSrc(value);
 
-                // we could make the client believe that
-                // the banned element has been loaded
-                //
-                //isBanned && this.onload();
+                // make the client believe that the banned
+                // element has been loaded
+                isBanned && typeof this.onload == 'function' && this.onload();
             } else if (name === 'class') {
                 isBanned = value.split(' ').reduce(function (acc, item) {
                     return acc || baitClasses.indexOf(item) > -1;
@@ -282,6 +281,7 @@ var INJECT = (function (document) {
             }
 
             debug && isBanned && console.log('[AdStopEnforcer]', '[banned attribute]', name, value);
+            //debug && isBanned || console.log('[AdStopEnforcer]', '[allowed attribute]', name, value);
 
             isBanned || realSetAttribute.call(this, name, value);
         };

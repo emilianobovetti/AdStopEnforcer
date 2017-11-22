@@ -1,4 +1,13 @@
-# AdStopEnforcer  ![logo-16](https://cloud.githubusercontent.com/assets/3957026/16249735/808c63a2-3818-11e6-9783-41885b0bb975.png)
+This project is no longer maintained
+------------------------------------
+
+I am sorry to say that, but it requires a lot of work. Since June 2016 I had not time to make the major improvements AdStopEnforcer needs. I loved this project and I hope someone found it useful.
+I thank you all : )
+
+------------------------------------
+
+AdStopEnforcer
+==============
 
 Download from [addons.mozilla.org](https://addons.mozilla.org/firefox/addon/adstop-enforcer)
 

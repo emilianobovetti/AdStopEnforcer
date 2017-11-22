@@ -154,6 +154,9 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'antiblock.org',
         'ads.yahoo.com',
         'ads.zynga.com',
+        'magifirst.com', // ad fly
+        'versionall.net', // ad fly
+        'callmd5map.com', // ad fly
         't.mdn2015x4.com',
         'ads.twitter.com',
         'promote.pair.com',
@@ -169,6 +172,7 @@ chrome.runtime.sendMessage({ storage: 'mode' }, function (response) {
         'pubads.g.doubleclick.net',
         'adsatt.espn.starwave.com',
         'partnerads.ysm.yahoo.com',
+        'googleads.g.doubleclick.net',
         'adsatt.abcnews.starwave.com',
         'www.doubleclickbygoogle.com',
         'pagead2.googlesyndication.com',

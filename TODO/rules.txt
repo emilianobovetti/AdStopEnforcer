@@ -1,0 +1,44 @@
+1. Blocking by address parts
+
+  /banner/*/img^
+
+  Where:
+
+    ^ =      //           :    /       ? =  & =                        ^
+        http://example.com:8000/foo.bar?a=12&b=%D1%82%D0%B5%D1%81%D1%82
+
+    * = 0 or more chars
+
+2. Blocking by domain name
+
+  ||ads.example.com^
+
+  Where:
+
+    || = Domain name anchor
+
+3. Blocking exact address
+
+  |http://example.com/
+  http://example.com/|
+  |http://example.com/|
+
+  Where:
+
+    | = Start anchor / End anchor
+
+4. Options in blocking rules
+
+  ||ads.example.com^$script,image,domain=example.com|~foo.example.info
+
+  Where:
+
+    $ = Option separator
+
+    script,image = Type option
+
+    domain=dom1|dom2|~dom3 = Domain option
+
+5. Exception rules
+
+@@||ads.example.com/notbanner^$~script
